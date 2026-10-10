@@ -2,11 +2,20 @@ import { useState } from 'react';
 import { ImageOff } from 'lucide-react';
 
 /**
- * Image with graceful fallback — a broken path never collapses the card.
- * Shows a neutral placeholder with descriptive alt text if loading fails.
+ * Image with a secondary photo source before showing the neutral fallback.
+ * This keeps crop cards useful when a primary remote image URL has expired.
  */
-export default function SmartImage({ src, alt, className, style, fallbackLabel }) {
+export default function SmartImage({
+  src,
+  alt,
+  className,
+  style,
+  fallbackLabel,
+  fallbackSrc,
+  loading = 'lazy',
+}) {
   const [failed, setFailed] = useState(false);
+  const [usingFallback, setUsingFallback] = useState(false);
 
   if (failed) {
     return (
@@ -36,12 +45,18 @@ export default function SmartImage({ src, alt, className, style, fallbackLabel }
 
   return (
     <img
-      src={src}
+      src={usingFallback && fallbackSrc ? fallbackSrc : src}
       alt={alt}
       className={className}
       style={style}
-      loading="lazy"
-      onError={() => setFailed(true)}
+      loading={loading}
+      onError={() => {
+        if (!usingFallback && fallbackSrc) {
+          setUsingFallback(true);
+        } else {
+          setFailed(true);
+        }
+      }}
     />
   );
 }
