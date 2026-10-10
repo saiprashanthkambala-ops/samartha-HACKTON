@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { Leaf, Menu, X } from 'lucide-react';
+import { Bot, Leaf, Menu, X } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext.jsx';
 import LanguageSelector from './LanguageSelector.jsx';
 import ProfileControl from './ProfileControl.jsx';
@@ -15,6 +15,7 @@ export default function AppHeader() {
     { to: '/weather', label: t('nav.weather') },
     { to: '/market-prices', label: t('nav.market') },
     { to: '/farmer-diary', label: t('nav.diary') },
+    { to: '/ai-assistant', label: t('nav.assistant'), icon: Bot },
   ];
 
   return (
@@ -33,9 +34,10 @@ export default function AppHeader() {
               key={item.to}
               to={item.to}
               end={item.end}
-              className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}
+              className={({ isActive }) => `nav-link${isActive ? ' active' : ''}${item.icon ? ' nav-link-with-icon' : ''}`}
               onClick={() => setOpen(false)}
             >
+              {item.icon && <item.icon size={16} aria-hidden />}
               {item.label}
             </NavLink>
           ))}

@@ -16,9 +16,13 @@ function detectInitial() {
 
 export function LanguageProvider({ children }) {
   const [lang, setLangState] = useState(detectInitial);
+  const localeByLanguage = {
+    en: 'en-IN', te: 'te-IN', hi: 'hi-IN', ta: 'ta-IN',
+    kn: 'kn-IN', ml: 'ml-IN', pa: 'pa-IN', bn: 'bn-IN',
+  };
 
   useEffect(() => {
-    document.documentElement.lang = lang === 'te' ? 'te' : 'en';
+    document.documentElement.lang = lang;
     try {
       localStorage.setItem(STORAGE_KEY, lang);
     } catch {
@@ -59,7 +63,7 @@ export function LanguageProvider({ children }) {
         date = new Date(s.includes('T') ? s : `${s.slice(0, 10)}T00:00:00`);
       }
       if (Number.isNaN(date.getTime())) return String(value);
-      return new Intl.DateTimeFormat(lang === 'te' ? 'te-IN' : 'en-IN', opts).format(date);
+      return new Intl.DateTimeFormat(localeByLanguage[lang] || 'en-IN', opts).format(date);
     },
     [lang]
   );
@@ -67,7 +71,7 @@ export function LanguageProvider({ children }) {
   const formatCurrency = useCallback(
     (amount) => {
       if (amount == null || Number.isNaN(Number(amount))) return '—';
-      return new Intl.NumberFormat(lang === 'te' ? 'te-IN' : 'en-IN', {
+      return new Intl.NumberFormat(localeByLanguage[lang] || 'en-IN', {
         style: 'currency',
         currency: 'INR',
         maximumFractionDigits: 0,
@@ -79,7 +83,7 @@ export function LanguageProvider({ children }) {
   const formatNumber = useCallback(
     (n) => {
       if (n == null || Number.isNaN(Number(n))) return '—';
-      return new Intl.NumberFormat(lang === 'te' ? 'te-IN' : 'en-IN').format(Number(n));
+      return new Intl.NumberFormat(localeByLanguage[lang] || 'en-IN').format(Number(n));
     },
     [lang]
   );

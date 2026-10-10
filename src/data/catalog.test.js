@@ -18,7 +18,7 @@ describe('crop catalogue', () => {
       expect(c.id).toBeTruthy();
       expect(c.name).toBeTruthy();
       expect(c.nameTe).toBeTruthy();
-      expect(c.image).toMatch(/^\/images\/crops\/.*\.jpg$/);
+      expect(c.image).toMatch(/^(\/images\/crops\/.*\.jpg|https?:\/\/[^\s]+)$/);
       expect(c.category).toMatch(/vegetable|fruit|field/);
       expect(c.description).toBeTruthy();
       expect(Array.isArray(c.growthStages)).toBe(true);
@@ -37,6 +37,16 @@ describe('crop catalogue', () => {
     for (const id of MARKET_CROP_IDS) expect(getCrop(id)).toBeTruthy();
   });
 
+  it('includes the supplemental Indian fruit and vegetable catalogue without duplicate ids', () => {
+    expect(crops.length).toBe(107);
+    for (const id of ['papaya', 'pineapple', 'sapota', 'litchi', 'jackfruit', 'dragon-fruit', 'bael', 'kokum']) {
+      expect(getCrop(id)?.category).toBe('fruit');
+    }
+    for (const id of ['pumpkin', 'bottle-gourd', 'ridge-gourd', 'spinach', 'beetroot', 'turmeric']) {
+      expect(getCrop(id)?.category).toBe('vegetable');
+    }
+  });
+
   it('searches by name and keywords', () => {
     expect(searchCrops('onion').some((c) => c.id === 'onion')).toBe(true);
     expect(searchCrops('mango').some((c) => c.id === 'mango')).toBe(true);
@@ -46,21 +56,29 @@ describe('crop catalogue', () => {
 
   it('filters by category', () => {
     const veg = cropsByCategory('vegetable');
-    expect(veg.length).toBe(12);
+    expect(veg.length).toBe(32);
     expect(veg.every((c) => c.category === 'vegetable')).toBe(true);
   });
 });
 
 describe('translations', () => {
-  it('supports en and te with full key parity', () => {
-    expect(LANGUAGES.map((l) => l.code)).toEqual(['en', 'te']);
+  it('supports the eight configured locale codes and required feature labels', () => {
+    expect(LANGUAGES.map((l) => l.code)).toEqual(['en', 'te', 'hi', 'ta', 'kn', 'ml', 'pa', 'bn']);
+    for (const code of LANGUAGES.map((l) => l.code)) {
+      expect(translations[code]['nav.assistant']).toBeTruthy();
+      expect(translations[code]['profile.title']).toBeTruthy();
+      expect(translations[code]['ai.voiceInput']).toBeTruthy();
+    }
+  });
+  it('keeps English and Telugu dictionaries in key parity', () => {
+    expect(LANGUAGES.map((l) => l.code)).toEqual(['en', 'te', 'hi', 'ta', 'kn', 'ml', 'pa', 'bn']);
     const enKeys = Object.keys(translations.en).sort();
     const teKeys = Object.keys(translations.te).sort();
     expect(teKeys).toEqual(enKeys);
   });
 
   it('has no blank values', () => {
-    for (const lang of ['en', 'te']) {
+    for (const lang of LANGUAGES.map((language) => language.code)) {
       for (const [key, value] of Object.entries(translations[lang])) {
         expect(typeof value, `${lang}:${key}`).toBe('string');
         expect(value.length, `${lang}:${key}`).toBeGreaterThan(0);
