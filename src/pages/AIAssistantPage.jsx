@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Bot, Info, Send, User } from 'lucide-react';
+import { Bot, Info, Mic, Send, User, Volume2, VolumeX } from 'lucide-react';
 import { PageContainer, PageHeading } from '../components/layout/Page.jsx';
 import { SourceChip, LoadingState, StatusBadge } from '../components/shared/States.jsx';
 import { useLanguage } from '../i18n/LanguageContext.jsx';
@@ -87,6 +87,15 @@ export default function AIAssistantPage() {
   const [error, setError] = useState(null);
   const [lastQuestion, setLastQuestion] = useState('');
   const logRef = useRef(null);
+  const recognitionRef = useRef(null);
+  const [listening, setListening] = useState(false);
+  const [voiceMessage, setVoiceMessage] = useState('');
+  const [speaking, setSpeaking] = useState(false);
+
+  const speechLocale = {
+    en: 'en-IN', te: 'te-IN', hi: 'hi-IN', ta: 'ta-IN',
+    kn: 'kn-IN', ml: 'ml-IN', pa: 'pa-IN', bn: 'bn-IN',
+  }[lang] || 'en-IN';
 
   useEffect(() => {
     if (logRef.current) logRef.current.scrollTop = logRef.current.scrollHeight;
@@ -107,6 +116,79 @@ export default function AIAssistantPage() {
     } finally {
       setSending(false);
     }
+  }
+
+  useEffect(() => () => {
+    try { recognitionRef.current?.stop(); } catch { /* no active recognition */ }
+    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+  }, []);
+
+  function startVoiceInput() {
+    setVoiceMessage('');
+    const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!Recognition) {
+      setVoiceMessage(t('ai.voiceUnsupported'));
+      return;
+    }
+    try {
+      recognitionRef.current?.stop();
+      const recognition = new Recognition();
+      recognition.lang = speechLocale;
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+      recognition.onstart = () => setListening(true);
+      recognition.onresult = (event) => {
+        const transcript = event.results?.[0]?.[0]?.transcript?.trim();
+        if (transcript) {
+          setInput(transcript);
+          setListening(false);
+          send(transcript);
+        }
+      };
+      recognition.onerror = () => {
+        setListening(false);
+        setVoiceMessage(t('ai.voiceError'));
+      };
+      recognition.onend = () => setListening(false);
+      recognitionRef.current = recognition;
+      recognition.start();
+    } catch {
+      setListening(false);
+      setVoiceMessage(t('ai.voiceError'));
+    }
+  }
+
+  function stopVoiceInput() {
+    try { recognitionRef.current?.stop(); } catch { /* ignore stop if not active */ }
+    setListening(false);
+  }
+
+  function speakAnswer(answer) {
+    setVoiceMessage('');
+    if (!('speechSynthesis' in window) || typeof window.SpeechSynthesisUtterance === 'undefined') {
+      setVoiceMessage(t('ai.voiceOutputUnsupported'));
+      return;
+    }
+    window.speechSynthesis.cancel();
+    const text = [
+      answer?.summary,
+      ...(answer?.observations || []),
+      ...(answer?.actions || []),
+      ...(answer?.avoid || []),
+    ].filter(Boolean).join('. ');
+    if (!text) return;
+    const utterance = new window.SpeechSynthesisUtterance(text);
+    utterance.lang = speechLocale;
+    utterance.onstart = () => setSpeaking(true);
+    utterance.onend = () => setSpeaking(false);
+    utterance.onerror = () => setSpeaking(false);
+    window.speechSynthesis.speak(utterance);
+  }
+
+  function stopSpeaking() {
+    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+    setSpeaking(false);
   }
 
   const suggestions = [
@@ -139,6 +221,11 @@ export default function AIAssistantPage() {
             ) : (
               <div key={i} className="chat-bubble assistant">
                 <AssistantAnswer answer={m.answer} source={m.source} lang={lang} t={t} />
+                <div className="assistant-voice-row">
+                  <button type="button" className="btn btn-white btn-sm" onClick={() => speakAnswer(m.answer)} aria-label={t('ai.voiceOutput')}>
+                    <Volume2 size={15} aria-hidden /> {t('ai.voiceOutput')}
+                  </button>
+                </div>
               </div>
             )
           )}
@@ -186,10 +273,30 @@ export default function AIAssistantPage() {
             placeholder={t('ai.placeholder')}
             aria-label={t('ai.placeholder')}
           />
+          <button
+            type="button"
+            className={`btn ${listening ? 'btn-primary' : 'btn-white'}`}
+            onClick={listening ? stopVoiceInput : startVoiceInput}
+            aria-label={listening ? t('ai.stopListening') : t('ai.voiceInput')}
+            title={listening ? t('ai.stopListening') : t('ai.voiceInput')}
+            disabled={sending}
+          >
+            <Mic size={16} aria-hidden /> {listening ? t('ai.stopListening') : t('ai.voiceInput')}
+          </button>
           <button type="submit" className="btn btn-primary" disabled={sending || !input.trim()}>
             <Send size={15} aria-hidden /> {t('ai.send')}
           </button>
         </form>
+        {(listening || voiceMessage) && (
+          <p className="assistant-voice-status" role="status">
+            {listening ? t('ai.listening') : voiceMessage}
+          </p>
+        )}
+        {speaking && (
+          <button type="button" className="assistant-stop-voice" onClick={stopSpeaking}>
+            <VolumeX size={15} aria-hidden /> {t('ai.stopVoice')}
+          </button>
+        )}
       </div>
     </PageContainer>
   );
