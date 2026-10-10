@@ -149,7 +149,7 @@ export default function FarmerDiaryPage() {
                       {crop && <StatusBadge tone="green">{cropName(crop)}</StatusBadge>}
                       {entry.isDemo && <StatusBadge tone="warning">{t('common.demoBadge')}</StatusBadge>}
                     </div>
-                    {entry.description && <p className="entry-desc">{entry.description}</p>}
+                    {entry.description && <p className="entry-desc">{t(entry.description)}</p>}
                     <div className="entry-meta">
                       <span>{formatDate(entry.date)}</span>
                       {entry.quantity != null && (
@@ -163,7 +163,7 @@ export default function FarmerDiaryPage() {
                         </span>
                       )}
                     </div>
-                    {entry.notes && <p className="small text-muted" style={{ margin: '4px 0 0' }}>{entry.notes}</p>}
+                    {entry.notes && <p className="small text-muted" style={{ margin: '4px 0 0' }}>{t(entry.notes)}</p>}
                   </div>
                   {crop && <SmartImage className="entry-thumb" src={crop.image} alt={cropName(crop)} />}
                   <ChevronRight size={18} color="var(--muted)" aria-label={t('diary.viewDetail')} />

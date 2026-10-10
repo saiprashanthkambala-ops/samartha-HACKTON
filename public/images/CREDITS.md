@@ -1,18 +1,20 @@
 # FarmShield image credits
 
-All crop, hero and diary photographs in `public/images/` were sourced through
-publicly available image search results (Pexels, Pixabay, Unsplash, Vecteezy,
-Stockcake and similar free-licence sources). They are used as **placeholder
-production assets** for this hackathon frontend.
+All crop, farmer, hero and diary photographs in `public/images/` were sourced
+through publicly available image search results (Pexels, Pixabay, Unsplash,
+Vecteezy, Freepik, Rawpixel, Stockcake, Wikimedia Commons, Specialty Produce and similar
+free-licence sources). Every file was opened and visually verified to depict
+the intended subject without watermarks, illustrations or AI generation. They
+are used as **placeholder production assets** for this hackathon frontend.
 
 **Before a public/production release, replace these with your own or formally
 licensed photographs.** Image paths are configured centrally in
-`src/data/crops.js` and `src/data/heroAssets.js`, so swapping files (or paths)
-does not require UI changes.
+`src/data/crops.js` (crop catalogue) and `src/data/farmers.js` (carousel), so
+swapping files (or paths) does not require UI changes.
 
 | File | Subject | Source used |
 | --- | --- | --- |
-| crops/onion.jpg (current source URL in catalogue) | Red/purple Indian market onion | vedvyasexim.com (remote placeholder; verify rights and availability before production) |
+| crops/onion.jpg | Onion | vecteezy.com free photo (white onion) |
 | crops/tomato.jpg | Tomato | pexels.com (red tomatoes) |
 | crops/potato.jpg | Potato | pexels.com (potatoes on board) |
 | crops/chilli.jpg | Chilli | pexels.com (chilli peppers) |
@@ -24,6 +26,18 @@ does not require UI changes.
 | crops/cauliflower.jpg | Cauliflower | unsplash.com (cauliflower) |
 | crops/capsicum.jpg | Capsicum | istockphoto preview (replace in production) |
 | crops/bitter-gourd.jpg | Bitter gourd | pixabay.com (bitter gourd) |
+| crops/french-beans.jpg | French beans | freepik.com / Wikimedia free photo (green french beans) |
+| crops/cluster-beans.jpg | Cluster beans (guar) | Wikimedia Commons photo (guar pods) |
+| crops/green-peas.jpg | Green peas | pexels.com / Wikimedia (fresh green peas in pods) |
+| crops/amaranth.jpg | Amaranth greens | Wikimedia Commons / specialtyproduce.com photo |
+| crops/drumstick.jpg | Drumstick (moringa) | Wikimedia Commons (moringa oleifera pods) |
+| crops/ridge-gourd.jpg | Ridge gourd | Wikimedia Commons / vecteezy (angled gourd) |
+| crops/beetroot.jpg | Beetroot | Wikimedia Commons / vecteezy (beetroot with leaves) |
+| crops/radish.jpg | White radish (daikon) | Wikimedia Commons / vecteezy (daikon) |
+| crops/garlic.jpg | Garlic | Wikimedia Commons / vecteezy (whole garlic bulbs) |
+| crops/ginger.jpg | Ginger | pexels.com / Wikimedia (fresh ginger rhizomes) |
+| crops/turmeric.jpg | Turmeric | pexels.com / Wikimedia (turmeric rhizomes) |
+| crops/sweet-potato.jpg | Sweet potato | pexels.com / Wikimedia (sweet potatoes) |
 | crops/mango.jpg | Mango | vecteezy.com free photo (mangoes) |
 | crops/banana.jpg | Banana | pexels.com (bananas) |
 | crops/orange.jpg | Orange | vecteezy.com free photo (oranges) |
@@ -34,35 +48,37 @@ does not require UI changes.
 | crops/paddy.jpg | Paddy / rice | vecteezy.com free photo (paddy field) |
 | crops/maize.jpg | Maize | vecteezy.com free photo (corn field) |
 | crops/cotton.jpg | Cotton | pexels.com (cotton field) |
+| crops/wheat.jpg | Wheat | pexels.com / Wikimedia (golden wheat field) |
 | crops/groundnut.jpg | Groundnut | pexels.com (peanuts) |
 | crops/sugarcane.jpg | Sugarcane | stockcake.com (sugarcane field) |
+| farmers/punjab.jpg | Farmers in a wheat field (Punjab) | Wikimedia Commons free photo |
+| farmers/telangana.jpg | Farmer portrait (Telangana) | Wikimedia Commons free photo (same subject as hero/farmer.jpg) |
+| farmers/andhra-pradesh.jpg | Young farmer, red head cloth (Andhra Pradesh) | Wikimedia Commons free photo |
+| farmers/karnataka.jpg | Farmer smiling (Karnataka) | Wikimedia Commons free photo |
+| farmers/tamil-nadu.jpg | Elder farmer in a rice field (Tamil Nadu) | Wikimedia Commons free photo |
+| farmers/kerala.jpg | Farmers with harvest bundles (Kerala) | Wikimedia Commons free photo |
+| farmers/maharashtra.jpg | Farmer portrait (Maharashtra) | Wikimedia Commons free photo |
+| farmers/west-bengal.jpg | Farmer in a paddy field (West Bengal) | Wikimedia Commons free photo |
 | hero/farm-field.jpg | Farm landscape | stockcake.com (crop field landscape) |
-| hero/farmer.jpg | Farmer portrait | vecteezy.com free photo (farmer) |
+| hero/farmer.jpg | Farmer portrait | vecteezy.com free photo (same subject as farmers/telangana.jpg) |
 | diary/okra-harvest.jpg | Okra harvest | pexels.com (hands holding okra) |
 
+## Farmer carousel labelling policy
+
+The eight carousel photographs are **representative regional photographs**.
+The state labels describe the farming region each photograph represents — they
+are **not** verified identity, origin or affiliation claims about the people
+shown. Alt text is written honestly (e.g. “representative photo for Kerala”).
+No photograph is reused across carousel entries.
+
 No image in this repository was AI-generated by the developer of this app.
-
-
-## Supplemental catalogue images
-
-The expanded catalogue uses direct crop-specific image URLs so the repository
-does not need to commit dozens of unverified binary assets in this feature
-branch. Each card retains the existing image fallback when a remote image is
-unavailable. Check every image URL and its current license/attribution before
-public production use. Prefer locally stored, license-cleared files under
-`public/images/crops/` once the chosen assets have been reviewed.
-
-The onion card now uses a red/purple Indian market-onion photo source rather
-than the previous white-onion placeholder. The exact image should be reviewed
-on the target UI before release.
 
 ## Farmer profile photo
 
 Place the photo prepared by the application owner at
 `public/images/profile/farmer-profile.jpg`. The header avatar and profile
 modal read from this one shared path, and both fall back to the existing user
-icon while the file is not yet present. This PR does not generate or replace
-the owner's photo.
+icon while the file is not yet present.
 
 Profile form details are demo-only and saved in this browser. Official Aadhaar
 or government ID verification is not implemented by this frontend-only change.

@@ -94,7 +94,7 @@ export default function AIAssistantPage() {
 
   const speechLocale = {
     en: 'en-IN', te: 'te-IN', hi: 'hi-IN', ta: 'ta-IN',
-    kn: 'kn-IN', ml: 'ml-IN', pa: 'pa-IN', bn: 'bn-IN',
+    kn: 'kn-IN', ml: 'ml-IN', mr: 'mr-IN', pa: 'pa-IN', bn: 'bn-IN',
   }[lang] || 'en-IN';
 
   useEffect(() => {
@@ -109,7 +109,7 @@ export default function AIAssistantPage() {
     setSending(true);
     setError(null);
     try {
-      const res = await askAssistant(question);
+      const res = await askAssistant(question, { language: lang });
       setMessages((m) => [...m, { role: 'user', text: question }, { role: 'assistant', answer: res.data, source: res.source }]);
     } catch (e) {
       setError(e);

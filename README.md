@@ -2,7 +2,8 @@
 
 FarmShield is an agriculture technology platform frontend: crop guidance, weather
 analysis, market prices, a farmer diary and an AI farm assistant — in one clean,
-farmer-friendly interface (English / తెలుగు).
+farmer-friendly interface in eight languages (English, हिन्दी, తెలుగు, தமிழ்,
+ಕನ್ನಡ, മലയാളം, मराठी, বাংলা).
 
 This repository contains the **frontend only** (my responsibility). The backend
 (APIs, database, AI processing) is developed separately and is **not** included
@@ -53,7 +54,7 @@ src/
                 (the only place that switches API vs demo adapter)
   components/   Reusable UI (layout, home, crop, weather, market, diary, shared)
   data/         Crop catalogue (single source of truth) + demo dataset
-  i18n/         English/తెలుగు translations + language context
+  i18n/         Eight complete dictionaries + language context + formatters
   pages/        Route pages (Home, Crops, Crop details, Weather, Market,
                 Farmer Diary, AI Assistant, 404)
 public/
@@ -82,13 +83,24 @@ never hard-code URLs or assume unverified response fields.
 
 ## Language support
 
-The header language selector switches the complete interface between English
-and తెలుగు (persisted in `localStorage`). Farmer-entered text (diary notes,
-questions) is preserved as entered. Telugu rendering uses a Telugu-capable font
-fallback stack.
+The header language selector switches the complete interface between the eight
+configured languages — English, हिन्दी, తెలుగు, தமிழ், ಕನ್ನಡ, മലയാളം, मराठी and
+বাংলা (persisted in `localStorage` as `farmshield.lang`, restored on refresh,
+invalid values fall back safely to English). Every dictionary in
+`src/i18n/dicts/` carries the same key set; automated tests compare keys and
+interpolation placeholders across all eight languages. Crop names and
+descriptions are keyed by stable crop ids; structured facts (seasons, ranges,
+temperatures) are rendered through `src/i18n/format.js` with locale-aware
+number and date formatting. Farmer-entered text (diary notes, questions) is
+preserved as entered. The selected language is forwarded to the AI assistant
+API so replies can follow it.
 
 ## Images
 
 Crop photographs live in `public/images/crops/` and are configured in
-`src/data/crops.js`. Credits and replacement notes: `public/images/CREDITS.md`.
-Broken image paths degrade to a labelled placeholder and never break the layout.
+`src/data/crops.js`; farmer-carousel photographs live in `public/images/farmers/`
+and are configured in `src/data/farmers.js`. Credits and replacement notes:
+`public/images/CREDITS.md`. Broken image paths degrade to a labelled placeholder
+and never break the layout (no retry loop, no substitute photo). The home hero
+carries an eight-entry farmer carousel (5s auto-rotation, dots, keyboard
+navigation, pause on hover/focus, reduced-motion support).

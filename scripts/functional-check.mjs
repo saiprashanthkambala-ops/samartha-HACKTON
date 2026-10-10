@@ -44,7 +44,7 @@ try {
   await page.click('#tab-storage');
   await new Promise((r) => setTimeout(r, 200));
   const storageText = await page.$eval('#panel-storage', (e) => e.textContent);
-  check('storage tab shows storage guidance', /ventilation|Ventilation|గాలి/i.test(storageText));
+  check('storage tab shows storage guidance', /handling|moisture|climate|packaging|inspection|risk/i.test(storageText));
   await page.click('#tab-market');
   await new Promise((r) => setTimeout(r, 500));
   const marketText = await page.$eval('#panel-market', (e) => e.textContent);

@@ -3,9 +3,9 @@ import { ArrowRight, Bot, Sprout } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext.jsx';
 import Logo from '../common/Logo.jsx';
 import SmartImage from '../shared/SmartImage.jsx';
+import FarmerCarousel from './FarmerCarousel.jsx';
 
 const HERO_BG = '/images/hero/farm-field.jpg';
-const HERO_FARMER = '/images/hero/farmer.jpg';
 
 export default function HomeHero() {
   const { t } = useLanguage();
@@ -38,12 +38,7 @@ export default function HomeHero() {
         </div>
 
         <div className="hero-right">
-          <SmartImage
-            className="hero-farmer"
-            src={HERO_FARMER}
-            alt={t('hero.farmerAlt')}
-            fallbackLabel=""
-          />
+          <FarmerCarousel />
 
           <div className="ai-card">
             <div className="ai-icon">

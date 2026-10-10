@@ -111,7 +111,7 @@ export default function WeatherPage() {
                     {formatNumber(current.data.temperatureC)}
                     {t('weather.unit.celsius')}
                   </div>
-                  <div className="weather-desc">{current.data.condition}</div>
+                  <div className="weather-desc">{t(current.data.condition)}</div>
                 </div>
               </div>
             </div>
@@ -147,7 +147,7 @@ export default function WeatherPage() {
                   <Thermometer size={14} aria-hidden /> {t('weather.condition')}
                 </div>
                 <div className="m-value" style={{ fontSize: '0.95rem' }}>
-                  {current.data.condition}
+                  {t(current.data.condition)}
                 </div>
               </div>
             </div>
@@ -182,7 +182,7 @@ export default function WeatherPage() {
                     {t('weather.unit.celsius')} / {d.tempMinC}
                     {t('weather.unit.celsius')}
                   </div>
-                  <div className="f-cond">{d.condition}</div>
+                  <div className="f-cond">{t(d.condition)}</div>
                   <div className="f-rain">
                     <CloudRain size={13} aria-hidden /> {d.rainMm} {t('weather.unit.mm')}
                   </div>
@@ -212,10 +212,10 @@ export default function WeatherPage() {
                       <SmartImage src={crop.image} alt={cropName(crop)} />
                       <div className="impact-main">
                         <strong>{cropName(crop)}</strong>
-                        <div className="impact-note">{item.note}</div>
+                        <div className="impact-note">{t(item.note)}</div>
                       </div>
                       <StatusBadge tone={item.category === 'favourable' ? 'green' : 'warning'}>
-                        {item.category === 'favourable' ? 'Favourable (demo)' : 'Watch (demo)'}
+                        {item.category === 'favourable' ? t('demo.favourable') : t('demo.watch')}
                       </StatusBadge>
                     </div>
                   );
@@ -279,9 +279,9 @@ export default function WeatherPage() {
               <AlertTriangle size={20} aria-hidden />
               <div>
                 <strong>
-                  {a.title} {a.severity === 'warning' && <span aria-hidden>⚠</span>}
+                  {t(a.title)} {a.severity === 'warning' && <span aria-hidden>⚠</span>}
                 </strong>
-                <p>{a.body}</p>
+                <p>{t(a.body)}</p>
               </div>
             </div>
           ))
@@ -303,16 +303,16 @@ export default function WeatherPage() {
         ) : insights.data ? (
           <>
             <p>
-              <strong>{t('ai.summary')}:</strong> {insights.data.summary}
+              <strong>{t('ai.summary')}:</strong> {t(insights.data.summary)}
             </p>
             <p className="small">
-              <strong>{t('ai.observations')}:</strong> {insights.data.supportingData}
+              <strong>{t('ai.observations')}:</strong> {t(insights.data.supportingData)}
             </p>
             <p className="small">
-              <strong>{t('ai.uncertainty')}:</strong> {insights.data.uncertainty}
+              <strong>{t('ai.uncertainty')}:</strong> {t(insights.data.uncertainty)}
             </p>
             <p className="small">
-              <strong>{t('ai.actions')}:</strong> {insights.data.nextSteps}
+              <strong>{t('ai.actions')}:</strong> {t(insights.data.nextSteps)}
             </p>
             <SourceChip source={insights.source} />
             <p className="small text-muted" style={{ marginTop: 8, marginBottom: 0, display: 'flex', gap: 6 }}>

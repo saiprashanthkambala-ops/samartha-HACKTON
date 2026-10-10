@@ -17,6 +17,8 @@ import SmartImage from '../components/shared/SmartImage.jsx';
 import { SourceChip, LoadingState, ErrorState, EmptyState, StatusBadge } from '../components/shared/States.jsx';
 import { getCrop } from '../data/crops.js';
 import { useLanguage } from '../i18n/LanguageContext.jsx';
+import { cropDescKey } from '../i18n/translations.js';
+import { formatQuickFact, formatDuration } from '../i18n/format.js';
 import useAsync from '../hooks/useAsync.js';
 import {
   askAssistant,
@@ -34,25 +36,31 @@ const TABS = [
 ];
 
 function OverviewPanel({ crop }) {
-  const { t, lang } = useLanguage();
+  const { t, lang, locale } = useLanguage();
   return (
     <div className="card card-pad">
       <h3>{t('crop.overview.title')}</h3>
-      <p>{lang === 'te' ? crop.descriptionTe : crop.description}</p>
+      <p>{t(cropDescKey(crop.id))}</p>
       <div className="grid-2 mt-16">
         <div>
           <h4>{t('crop.growingSeason')}</h4>
-          <p className="small">{crop.quickFacts?.growingSeason || t('common.notAvailable')}</p>
+          <p className="small">
+            {crop.quickFacts?.growingSeason
+              ? formatQuickFact(crop.quickFacts.growingSeason, lang, locale)
+              : t('common.notAvailable')}
+          </p>
           <h4>{t('crop.duration')}</h4>
-          <p className="small">{crop.duration || t('common.notAvailable')}</p>
+          <p className="small">
+            {crop.duration ? formatDuration(crop.duration, lang, locale) : t('common.notAvailable')}
+          </p>
         </div>
         <div>
           <h4>{t('crop.growingGuidance')}</h4>
           <ul className="tip-list">
-            {(crop.growingGuidance ?? []).map((g, i) => (
+            {(crop.guidance ?? []).map((g, i) => (
               <li key={i}>
                 <CheckCircle2 size={16} aria-hidden />
-                <span>{g}</span>
+                <span>{t(`grow.${g}`)}</span>
               </li>
             ))}
           </ul>
@@ -90,7 +98,7 @@ function WeatherPanel({ weather, suitability }) {
                 <strong>
                   {formatNumber(weather.data.temperatureC)} {t('weather.unit.celsius')}
                 </strong>{' '}
-                · {weather.data.condition} · {t('weather.humidity')}{' '}
+                · {t(weather.data.condition)} · {t('weather.humidity')}{' '}
                 {formatNumber(weather.data.humidityPercent)}
                 {t('weather.unit.percent')}
               </p>
@@ -108,12 +116,12 @@ function WeatherPanel({ weather, suitability }) {
                 <>
                   <p style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                     <StatusBadge tone={suitability.data.status === 'suitable' ? 'green' : 'muted'}>
-                      {suitability.data.status === 'suitable' ? 'Suitable (demo)' : t('crop.weatherTab.pending')}
+                      {suitability.data.status === 'suitable' ? t('demo.suitable') : t('crop.weatherTab.pending')}
                     </StatusBadge>
                     <SourceChip source={suitability.source} />
                   </p>
-                  <p className="small">{suitability.data.explanation}</p>
-                  <p className="small text-muted mb-0">{t('crop.weatherTab.demoNote')}</p>
+                  <p className="small">{t(suitability.data.explanation)}</p>
+                  <p className="small text-muted mb-0">{t('demo.suitability.note')}</p>
                 </>
               ) : (
                 <p className="small">{t('crop.weatherTab.pending')}</p>
@@ -130,16 +138,11 @@ function WeatherPanel({ weather, suitability }) {
 }
 
 function StoragePanel({ crop }) {
-  const { t, lang } = useLanguage();
-  const catLabel = {
-    handling: t('crop.storageTab.handle'),
-    ventilation: t('crop.storageTab.ventilation'),
-    moisture: t('crop.storageTab.moisture'),
-    inspection: t('crop.storageTab.inspection'),
-    risks: t('crop.storageTab.risks'),
-  };
+  const { t } = useLanguage();
   const tips = crop.storageTips ?? [];
-  const groups = ['handling', 'ventilation', 'moisture', 'inspection', 'risks'];
+  // Storage-tip categories come from the shared tipcat.* vocabulary
+  // (handling, packaging, moisture, climate, inspection, risk-signs).
+  const groups = ['handling', 'packaging', 'moisture', 'climate', 'inspection', 'risk-signs'];
 
   return (
     <div className="card card-pad">
@@ -150,16 +153,16 @@ function StoragePanel({ crop }) {
           if (items.length === 0) return null;
           return (
             <div key={g}>
-              <h4>{catLabel[g]}</h4>
+              <h4>{t(`tipcat.${g}`)}</h4>
               <ul className="tip-list">
                 {items.map((item, i) => (
                   <li key={i}>
-                    {g === 'risks' ? (
+                    {g === 'risk-signs' ? (
                       <Info size={16} style={{ color: 'var(--warning)' }} aria-hidden />
                     ) : (
                       <CheckCircle2 size={16} aria-hidden />
                     )}
-                    <span>{lang === 'te' ? item.textTe : item.text}</span>
+                    <span>{t(`tip.${item.tip}`)}</span>
                   </li>
                 ))}
               </ul>
@@ -226,7 +229,7 @@ function MarketPanel({ crop, market }) {
 }
 
 function AIAdvisoryPanel({ crop }) {
-  const { t, cropName } = useLanguage();
+  const { t, cropName, lang } = useLanguage();
   const [question, setQuestion] = useState('');
   const [thread, setThread] = useState([]);
   const [sending, setSending] = useState(false);
@@ -241,7 +244,7 @@ function AIAdvisoryPanel({ crop }) {
     setSending(true);
     setError(null);
     try {
-      const res = await askAssistant(text, { cropId: crop.id });
+      const res = await askAssistant(text, { cropId: crop.id, language: lang });
       setThread((th) => [...th, { q: text, a: res.data, source: res.source }]);
     } catch (e) {
       setError(e);
@@ -350,7 +353,7 @@ export default function CropDetailsPage() {
   const suitability = useAsync(() => getCropSuitability(cropId), [cropId]);
   const market = useAsync(() => getMarketPrices(), []);
   const aiRec = useAsync(async () => {
-    const res = await askAssistant(t('ai.suggestion.storage'), { cropId, purpose: 'recommendation' });
+    const res = await askAssistant(t('ai.suggestion.storage'), { cropId, purpose: 'recommendation', language: lang });
     return res;
   }, [cropId]);
 
@@ -384,7 +387,7 @@ export default function CropDetailsPage() {
               {crop.popular && <StatusBadge tone="green">{t('crops.popular')}</StatusBadge>}
             </div>
             <h1>{cropName(crop)}</h1>
-            <p>{lang === 'te' ? crop.descriptionTe : crop.description}</p>
+            <p>{t(cropDescKey(crop.id))}</p>
           </div>
         </div>
         <CropQuickFacts crop={crop} />

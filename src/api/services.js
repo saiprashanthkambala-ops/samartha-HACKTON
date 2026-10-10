@@ -145,17 +145,19 @@ export async function createDiaryEntry(input) {
 
 /**
  * Send a question to the FarmShield AI assistant.
- * `context` may include { cropId } when a crop page is open (only when the
- * real API supports it — see endpoints.js).
+ * `context` may include { cropId, language } — `language` is the selected
+ * UI language code and is forwarded so the service answers in the same
+ * language (API_CONTRACT.md: body { question, language, context }).
  */
 export async function askAssistant(question, context = {}) {
+  const { language = 'en', ...rest } = context;
   if (!isApiConfigured()) {
     await new Promise((r) => setTimeout(r, 400));
     return wrapDemo({ ...demoAIAnswer(), question, context });
   }
   const data = await request(ENDPOINTS.ai.ask.path, {
     method: 'POST',
-    body: { question, context },
+    body: { question, language, context: rest },
   });
   return wrapApi(data);
 }

@@ -15,3 +15,11 @@ screenshots/
 view-*.jpg
 view-*.png
 shots-overview.jpg
+
+# image verification artifacts (contact sheets, full-size checks)
+check-*.jpg
+new-*.jpg
+*-sheet.jpg
+
+# patch files
+*.patch
