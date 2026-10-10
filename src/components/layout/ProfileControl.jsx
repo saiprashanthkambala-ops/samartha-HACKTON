@@ -68,7 +68,7 @@ export default function ProfileControl() {
       setProfile(cleanProfile);
       setSavedMessage(t('profile.saved'));
     } catch {
-      setSavedMessage(t('profile.verifyNote'));
+      setSavedMessage(t('profile.saveError'));
     }
   }
 
