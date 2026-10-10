@@ -1947,3 +1947,61 @@ textarea {
   .profile-modal-actions { align-items: stretch; }
   .profile-modal-actions .btn { flex: 1; justify-content: center; }
 }
+
+
+/* ---------- Rotating farmer portrait carousel ---------- */
+.farmer-carousel {
+  flex: 0 0 250px;
+  width: 250px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+.farmer-carousel .hero-farmer {
+  display: block;
+  width: 250px;
+  height: 290px;
+  object-fit: cover;
+  border-radius: var(--radius-lg);
+  border: 3px solid rgba(255, 255, 255, 0.7);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.28);
+  background: var(--page-bg-2);
+}
+.farmer-carousel-dots {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 7px;
+  min-height: 14px;
+}
+.farmer-carousel-dot {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.65);
+  box-shadow: 0 0 0 1px rgba(7, 59, 112, 0.3);
+  transition: width 180ms ease, background 180ms ease;
+  cursor: pointer;
+}
+.farmer-carousel-dot.active {
+  width: 20px;
+  background: var(--white);
+  box-shadow: 0 0 0 1px var(--blue);
+}
+.farmer-carousel-dot:focus-visible {
+  outline: 2px solid var(--white);
+  outline-offset: 3px;
+}
+@media (max-width: 900px) {
+  .farmer-carousel,
+  .farmer-carousel .hero-farmer { width: 210px; }
+  .farmer-carousel { flex-basis: 210px; }
+  .farmer-carousel .hero-farmer { height: 250px; }
+}
+@media (max-width: 640px) {
+  .farmer-carousel { width: min(100%, 250px); flex-basis: auto; }
+  .farmer-carousel .hero-farmer { width: 100%; height: 260px; }
+}
