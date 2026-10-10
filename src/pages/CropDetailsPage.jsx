@@ -25,10 +25,19 @@ import {
   getMarketPrices,
 } from '../api/services.js';
 
+const CROP_DETAIL_FALLBACKS = {
+  ginger: 'https://commons.wikimedia.org/wiki/Special:FilePath/Ginger_rhizomes.jpg?width=900',
+  'sweet-potato': 'https://commons.wikimedia.org/wiki/Special:FilePath/Sweet_potatoes.jpg?width=900',
+  'french-beans': 'https://commons.wikimedia.org/wiki/Special:FilePath/Green_bean.jpg?width=900',
+  'cluster-beans': 'https://commons.wikimedia.org/wiki/Special:FilePath/Cluster_beans.jpg?width=900',
+  turmeric: 'https://commons.wikimedia.org/wiki/Special:FilePath/Turmeric.jpg?width=900',
+  'green-peas': 'https://commons.wikimedia.org/wiki/Special:FilePath/Green_peas.jpg?width=900',
+  'amaranth-greens': 'https://commons.wikimedia.org/wiki/Special:FilePath/Amaranthus_tricolor.jpg?width=900',
+  drumstick: 'https://commons.wikimedia.org/wiki/Special:FilePath/Moringa_oleifera_pods.jpg?width=900',
+};
+
 function getCropFallbackSrc(crop) {
-  const lock = [...crop.id].reduce((total, character) => total + character.charCodeAt(0), 0);
-  const category = crop.category === 'fruit' ? 'fruit' : crop.category === 'vegetable' ? 'vegetable' : 'crop,field';
-  return `https://loremflickr.com/800/600/${encodeURIComponent(crop.name)},${category}?lock=${lock}`;
+  return CROP_DETAIL_FALLBACKS[crop.id];
 }
 
 const TABS = [
