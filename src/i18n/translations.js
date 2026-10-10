@@ -57,6 +57,7 @@ export const translations = {
     'profile.save': 'Save profile',
     'profile.close': 'Close profile',
     'profile.saved': 'Profile saved on this device.',
+    'profile.saveError': 'The profile could not be saved in this browser. Check browser storage settings and try again.',
     'profile.avatarAlt': 'Farmer profile photo',
     'profile.photoHint': 'Add your photo at public/images/profile/farmer-profile.jpg',
     'ai.voiceInput': 'Speak your question',
