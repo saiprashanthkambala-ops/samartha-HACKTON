@@ -1,4 +1,5 @@
 import AppHeader from './AppHeader.jsx';
+import Logo from '../common/Logo.jsx';
 import { useLanguage } from '../../i18n/LanguageContext.jsx';
 import { isApiConfigured } from '../../api/client.js';
 
@@ -13,7 +14,13 @@ export function PageContainer({ children }) {
       )}
       <AppHeader />
       <main className="page-main">{children}</main>
-      <footer className="app-footer">{t('app.footer')}</footer>
+      <footer className="app-footer">
+        <div className="footer-brand">
+          <Logo size="sm" className="footer-logo" alt={`${t('app.name')} logo`} />
+          <span className="footer-brand-name">{t('app.name')}</span>
+        </div>
+        <p className="footer-text">{t('app.footer')}</p>
+      </footer>
     </div>
   );
 }
