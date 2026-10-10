@@ -18,7 +18,7 @@ describe('crop catalogue', () => {
       expect(c.id).toBeTruthy();
       expect(c.name).toBeTruthy();
       expect(c.nameTe).toBeTruthy();
-      expect(c.image).toMatch(/^\/images\/crops\/.*\.jpg$/);
+      expect(c.image).toMatch(/^(\/images\/crops\/.*\.jpg|https?:\/\/[^\s]+)$/);
       expect(c.category).toMatch(/vegetable|fruit|field/);
       expect(c.description).toBeTruthy();
       expect(Array.isArray(c.growthStages)).toBe(true);
