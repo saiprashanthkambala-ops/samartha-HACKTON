@@ -37,6 +37,16 @@ describe('crop catalogue', () => {
     for (const id of MARKET_CROP_IDS) expect(getCrop(id)).toBeTruthy();
   });
 
+  it('includes the supplemental Indian fruit and vegetable catalogue without duplicate ids', () => {
+    expect(crops.length).toBe(107);
+    for (const id of ['papaya', 'pineapple', 'sapota', 'litchi', 'jackfruit', 'dragon-fruit', 'bael', 'kokum']) {
+      expect(getCrop(id)?.category).toBe('fruit');
+    }
+    for (const id of ['pumpkin', 'bottle-gourd', 'ridge-gourd', 'spinach', 'beetroot', 'turmeric']) {
+      expect(getCrop(id)?.category).toBe('vegetable');
+    }
+  });
+
   it('searches by name and keywords', () => {
     expect(searchCrops('onion').some((c) => c.id === 'onion')).toBe(true);
     expect(searchCrops('mango').some((c) => c.id === 'mango')).toBe(true);
@@ -46,14 +56,22 @@ describe('crop catalogue', () => {
 
   it('filters by category', () => {
     const veg = cropsByCategory('vegetable');
-    expect(veg.length).toBe(12);
+    expect(veg.length).toBe(32);
     expect(veg.every((c) => c.category === 'vegetable')).toBe(true);
   });
 });
 
 describe('translations', () => {
+  it('supports the eight configured locale codes and required feature labels', () => {
+    expect(LANGUAGES.map((l) => l.code)).toEqual(['en', 'te', 'hi', 'ta', 'kn', 'ml', 'pa', 'bn']);
+    for (const code of LANGUAGES.map((l) => l.code)) {
+      expect(translations[code]['nav.assistant']).toBeTruthy();
+      expect(translations[code]['profile.title']).toBeTruthy();
+      expect(translations[code]['ai.voiceInput']).toBeTruthy();
+    }
+  });
   it('supports en and te with full key parity', () => {
-    expect(LANGUAGES.map((l) => l.code)).toEqual(['en', 'te']);
+    expect(LANGUAGES.map((l) => l.code)).toEqual(['en', 'te', 'hi', 'ta', 'kn', 'ml', 'pa', 'bn']);
     const enKeys = Object.keys(translations.en).sort();
     const teKeys = Object.keys(translations.te).sort();
     expect(teKeys).toEqual(enKeys);
