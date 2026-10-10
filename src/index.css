@@ -2005,3 +2005,92 @@ textarea {
   .farmer-carousel { width: min(100%, 250px); flex-basis: auto; }
   .farmer-carousel .hero-farmer { width: 100%; height: 260px; }
 }
+
+
+/* Image recovery and FarmShield logo restoration */
+.brand-logo {
+  display: block;
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  flex: 0 0 auto;
+}
+.brand .brand-leaf {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Farmer carousel: fixed image area and readable region indicators */
+.farmer-carousel {
+  flex: 0 0 250px;
+  width: 250px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.farmer-carousel .hero-farmer {
+  display: block;
+  width: 250px;
+  height: 290px;
+  object-fit: cover;
+  object-position: center;
+  border-radius: var(--radius-lg);
+  border: 3px solid rgba(255, 255, 255, 0.78);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.24);
+  background: var(--page-bg-2);
+}
+.farmer-photo-fallback {
+  display: flex !important;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  color: var(--green-dark);
+  font-weight: 700;
+}
+.farmer-carousel-dots {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 7px;
+  min-height: 14px;
+}
+.farmer-carousel-dot {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: 0 0 0 1px rgba(7, 59, 112, 0.38);
+  transition: width 180ms ease, background 180ms ease;
+  cursor: pointer;
+}
+.farmer-carousel-dot.active {
+  width: 20px;
+  background: var(--white);
+  box-shadow: 0 0 0 1px var(--blue);
+}
+.farmer-carousel-dot:focus-visible {
+  outline: 2px solid var(--white);
+  outline-offset: 3px;
+}
+.farmer-region-label {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--white);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
+}
+@media (max-width: 900px) {
+  .farmer-carousel,
+  .farmer-carousel .hero-farmer { width: 210px; }
+  .farmer-carousel { flex-basis: 210px; }
+  .farmer-carousel .hero-farmer { height: 250px; }
+}
+@media (max-width: 640px) {
+  .farmer-carousel { width: min(100%, 250px); flex-basis: auto; }
+  .farmer-carousel .hero-farmer { width: 100%; height: 260px; }
+}

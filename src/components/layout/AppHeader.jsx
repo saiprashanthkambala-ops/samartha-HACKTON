@@ -5,6 +5,57 @@ import { useLanguage } from '../../i18n/LanguageContext.jsx';
 import LanguageSelector from './LanguageSelector.jsx';
 import ProfileControl from './ProfileControl.jsx';
 
+const LOGO_CANDIDATES = [
+  '/images/logo.png',
+  '/images/logo.svg',
+  '/images/logo.webp',
+  '/images/logo.jpg',
+  '/images/Logo.png',
+  '/images/Logo.svg',
+  '/images/farmshield-logo.png',
+  '/images/farmshield-logo.svg',
+  '/images/farmshield-logo.webp',
+  '/images/farmshield-logo.jpg',
+  '/images/farmshield_logo.png',
+  '/images/farmshield_logo.svg',
+  '/images/FarmShield.png',
+  '/images/FarmShield.svg',
+  '/images/FarmShieldLogo.png',
+  '/images/FarmShield-Logo.png',
+  '/images/logo-farmshield.png',
+  '/images/logo-farmshield.svg',
+  '/images/brand-logo.png',
+  '/images/brand.png',
+  '/images/farmshield.png',
+  '/images/farmshield-icon.png',
+  '/images/farmshield-icon.svg',
+];
+
+function BrandMark() {
+  const [candidateIndex, setCandidateIndex] = useState(0);
+  const [showFallback, setShowFallback] = useState(false);
+
+  if (showFallback) {
+    return (
+      <span className="brand-leaf" aria-hidden>
+        <Leaf size={20} />
+      </span>
+    );
+  }
+
+  return (
+    <img
+      className="brand-logo"
+      src={LOGO_CANDIDATES[candidateIndex]}
+      alt="FarmShield"
+      onError={() => {
+        if (candidateIndex < LOGO_CANDIDATES.length - 1) setCandidateIndex((index) => index + 1);
+        else setShowFallback(true);
+      }}
+    />
+  );
+}
+
 export default function AppHeader() {
   const { t } = useLanguage();
   const [open, setOpen] = useState(false);
@@ -21,12 +72,10 @@ export default function AppHeader() {
   return (
     <div className="app-header-wrap">
       <header className={`app-header${open ? ' actions-visible' : ''}`}>
-        <a className="brand" href="/" onClick={() => setOpen(false)}>
-          <span className="brand-leaf">
-            <Leaf size={20} aria-hidden />
-          </span>
-          {t('app.name')}
-        </a>
+        <NavLink className="brand" to="/" onClick={() => setOpen(false)} aria-label={t('app.name')}>
+          <BrandMark />
+          <span>{t('app.name')}</span>
+        </NavLink>
 
         <nav className={`main-nav${open ? ' open' : ''}`} aria-label={t('nav.menu')}>
           {navItems.map((item) => (
