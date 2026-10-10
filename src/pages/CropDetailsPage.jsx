@@ -25,6 +25,16 @@ import {
   getMarketPrices,
 } from '../api/services.js';
 
+function getCropFallbackSrc(crop) {
+  const lock = [...crop.id].reduce((total, character) => total + character.charCodeAt(0), 0);
+  const category = crop.category === 'fruit'
+    ? 'fruit'
+    : crop.category === 'vegetable'
+      ? 'vegetable'
+      : 'crop,field';
+  return `https://loremflickr.com/800/600/${encodeURIComponent(crop.name)},${category}?lock=${lock}`;
+}
+
 const TABS = [
   'overview',
   'weather',
@@ -195,6 +205,7 @@ function MarketPanel({ crop, market }) {
         <div className="grid-2">
           <SmartImage
             src={crop.image}
+            fallbackSrc={getCropFallbackSrc(crop)}
             alt={cropName(crop)}
             style={{ width: '100%', height: 190, objectFit: 'cover', borderRadius: 14 }}
           />
@@ -377,7 +388,11 @@ export default function CropDetailsPage() {
 
       <div className="crop-top mt-8">
         <div className="card crop-identity">
-          <SmartImage src={crop.image} alt={cropName(crop)} />
+          <SmartImage
+            src={crop.image}
+            fallbackSrc={getCropFallbackSrc(crop)}
+            alt={cropName(crop)}
+          />
           <div>
             <div className="badges">
               <StatusBadge tone="blue">{t(`category.${crop.category}`)}</StatusBadge>
