@@ -67,7 +67,6 @@ export default function ProfileControl() {
       localStorage.setItem(PROFILE_KEY, JSON.stringify(cleanProfile));
       setProfile(cleanProfile);
       setSavedMessage(t('profile.saved'));
-      setOpen(false);
     } catch {
       setSavedMessage(t('profile.verifyNote'));
     }
