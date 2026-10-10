@@ -7,6 +7,9 @@ import ProfileControl from './ProfileControl.jsx';
 
 const LOGO_CANDIDATES = [
   '/images/logo.png',
+  '/images/application.logo/Glossy Sun and Leaf Eco Emblem.png',
+  '/images/application.logo/Glossy%20Sun%20and%20Leaf%20Eco%20Emblem.png',
+  '/images/farmshield-logo.png',
   '/images/logo.svg',
   '/images/logo.webp',
   '/images/logo.jpg',
