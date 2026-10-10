@@ -12,7 +12,7 @@ does not require UI changes.
 
 | File | Subject | Source used |
 | --- | --- | --- |
-| crops/onion.jpg | Onion | vecteezy.com free photo (white onion) |
+| crops/onion.jpg (current source URL in catalogue) | Red/purple Indian market onion | vedvyasexim.com (remote placeholder; verify rights and availability before production) |
 | crops/tomato.jpg | Tomato | pexels.com (red tomatoes) |
 | crops/potato.jpg | Potato | pexels.com (potatoes on board) |
 | crops/chilli.jpg | Chilli | pexels.com (chilli peppers) |
