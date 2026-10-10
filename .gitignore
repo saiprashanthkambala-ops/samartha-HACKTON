@@ -1,0 +1,17 @@
+node_modules
+dist
+dist-ssr
+coverage
+.env
+.env.local
+.env.*.local
+*.log
+.DS_Store
+image-search/
+contact-sheet.jpg
+final-sheet.jpg
+# visual-check artifacts (dev only)
+screenshots/
+view-*.jpg
+view-*.png
+shots-overview.jpg
