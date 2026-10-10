@@ -70,7 +70,7 @@ describe('translations', () => {
       expect(translations[code]['ai.voiceInput']).toBeTruthy();
     }
   });
-  it('supports en and te with full key parity', () => {
+  it('keeps English and Telugu dictionaries in key parity', () => {
     expect(LANGUAGES.map((l) => l.code)).toEqual(['en', 'te', 'hi', 'ta', 'kn', 'ml', 'pa', 'bn']);
     const enKeys = Object.keys(translations.en).sort();
     const teKeys = Object.keys(translations.te).sort();
@@ -78,7 +78,7 @@ describe('translations', () => {
   });
 
   it('has no blank values', () => {
-    for (const lang of ['en', 'te']) {
+    for (const lang of LANGUAGES.map((language) => language.code)) {
       for (const [key, value] of Object.entries(translations[lang])) {
         expect(typeof value, `${lang}:${key}`).toBe('string');
         expect(value.length, `${lang}:${key}`).toBeGreaterThan(0);
