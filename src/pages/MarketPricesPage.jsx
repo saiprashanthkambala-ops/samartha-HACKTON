@@ -55,9 +55,7 @@ export default function MarketPricesPage() {
 
   const categories = [
     { id: 'all', label: t('category.all') },
-    { id: CROP_CATEGORIES.VEGETABLE, label: t('category.vegetable') },
-    { id: CROP_CATEGORIES.FRUIT, label: t('category.fruit') },
-    { id: CROP_CATEGORIES.FIELD, label: t('category.field') },
+    ...CROP_CATEGORIES.map((c) => ({ id: c.id, label: t(c.labelKey) })),
   ];
 
   return (
@@ -68,7 +66,7 @@ export default function MarketPricesPage() {
         actions={
           market.data ? (
             <span className="small text-muted" style={{ display: 'inline-flex', gap: 6, alignItems: 'center' }}>
-              <Store size={15} aria-hidden /> {market.data.market} · <CalendarDays size={14} aria-hidden />{' '}
+              <Store size={15} aria-hidden /> {t(market.data.market)} · <CalendarDays size={14} aria-hidden />{' '}
               {formatDate(market.data.reportedAt)} <SourceChip source={market.source} />
             </span>
           ) : null
@@ -129,7 +127,7 @@ export default function MarketPricesPage() {
                         <PriceSparkline history={entry.history} />
                         <div className="m-meta">
                           {t('market.reportedOn')}: {formatDate(market.data.reportedAt)}
-                          {market.data.grade ? ` · ${market.data.grade}` : ''}
+                          {market.data.grade ? ` · ${t(market.data.grade)}` : ''}
                         </div>
                       </>
                     ) : (
@@ -170,7 +168,7 @@ export default function MarketPricesPage() {
                     <h3 style={{ marginBottom: 4 }}>{cropName(selectedCrop)}</h3>
                     <p className="small text-muted mb-0">{t('market.details.market')}</p>
                     <p>
-                      <strong>{market.data.market}</strong>
+                      <strong>{t(market.data.market)}</strong>
                     </p>
                     <p className="small text-muted mb-0">{t('market.details.date')}</p>
                     <p>
@@ -185,7 +183,7 @@ export default function MarketPricesPage() {
                     <span className="m-unit">/ {t('unit.quintal')}</span>
                   </p>
                   <p className="small text-muted mb-0">{t('market.details.grade')}</p>
-                  <p className="small">{market.data.grade || t('common.notAvailable')}</p>
+                  <p className="small">{market.data.grade ? t(market.data.grade) : t('common.notAvailable')}</p>
                   <PriceChange entry={selectedEntry} t={t} />
                   <p className="mt-8">
                     <SourceChip source={market.source} />

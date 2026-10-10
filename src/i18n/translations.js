@@ -1,693 +1,83 @@
 /**
- * FarmShield translation dictionary. Untranslated optional strings fall back to English.
- * Flat key maps — `t('nav.home')` looks up `dict[lang][key]`.
+ * FarmShield translation core.
+ *
+ * Eight complete language dictionaries live in src/i18n/dicts/<code>.js.
+ * Every dictionary carries the SAME key set (checked by translations.test.js
+ * and scripts/i18n-check.mjs). Lookup is a flat key map:
+ *   t('nav.home') -> dict[lang]['nav.home']
+ *
+ * Crop names/descriptions are keyed by STABLE crop ids (cropName.<id>,
+ * cropDesc.<id>) — ids are never translated. Guideline bullets, storage
+ * tips, growth-stage names and quick-fact wording come from shared library
+ * keys (grow.*, tip.*, stage.*, fact.*, season.*, cond.*, life.*, …) so a
+ * language can never miss a crop-specific string. Structured numeric data
+ * (dates, ranges, temperatures) is formatted at render time via
+ * src/i18n/format.js with locale-aware number/date formatting.
+ *
  * Farmer-entered content (diary notes, questions) is never translated here.
  */
 
+import en from './dicts/en.js';
+import te from './dicts/te.js';
+import hi from './dicts/hi.js';
+import ta from './dicts/ta.js';
+import kn from './dicts/kn.js';
+import ml from './dicts/ml.js';
+import mr from './dicts/mr.js';
+import bn from './dicts/bn.js';
+
 export const LANGUAGES = [
-  { code: 'en', label: 'English', htmlLang: 'en' },
-  { code: 'te', label: 'తెలుగు', htmlLang: 'te' },
-  { code: 'hi', label: 'हिन्दी', htmlLang: 'hi' },
-  { code: 'ta', label: 'தமிழ்', htmlLang: 'ta' },
-  { code: 'kn', label: 'ಕನ್ನಡ', htmlLang: 'kn' },
-  { code: 'ml', label: 'മലയാളം', htmlLang: 'ml' },
-  { code: 'pa', label: 'ਪੰਜਾਬੀ', htmlLang: 'pa' },
-  { code: 'bn', label: 'বাংলা', htmlLang: 'bn' },
+  { code: 'en', label: 'English', htmlLang: 'en', locale: 'en-IN' },
+  { code: 'hi', label: 'हिन्दी', htmlLang: 'hi', locale: 'hi-IN' },
+  { code: 'te', label: 'తెలుగు', htmlLang: 'te', locale: 'te-IN' },
+  { code: 'ta', label: 'தமிழ்', htmlLang: 'ta', locale: 'ta-IN' },
+  { code: 'kn', label: 'ಕನ್ನಡ', htmlLang: 'kn', locale: 'kn-IN' },
+  { code: 'ml', label: 'മലയാളം', htmlLang: 'ml', locale: 'ml-IN' },
+  { code: 'mr', label: 'मराठी', htmlLang: 'mr', locale: 'mr-IN' },
+  { code: 'bn', label: 'বাংলা', htmlLang: 'bn', locale: 'bn-IN' },
 ];
 
-export const translations = {
-  en: {
-    // Brand / global
-    'app.name': 'FarmShield',
-    'app.demoBanner':
-      'DEMO MODE — sample data is shown for layout testing. Connect the FarmShield backend (VITE_API_BASE_URL) for live data.',
-    'app.footer':
-      'FarmShield — agriculture technology platform. Data shown in demo mode is illustrative only.',
+export const DEFAULT_LANGUAGE = 'en';
 
-    // Navigation
-    'nav.home': 'Home',
-    'nav.crops': 'Crops',
-    'nav.weather': 'Weather Analysis',
-    'nav.market': 'Market Prices',
-    'nav.diary': 'Farmer Diary',
-    'nav.menu': 'Menu',
-    'nav.profile': 'Profile',
+export const translations = { en, hi, te, ta, kn, ml, mr, bn };
 
-    'nav.assistant': 'AI Assistant',
-    'profile.name': 'Full name',
-    'profile.phone': 'Mobile number',
-    'profile.state': 'State',
-    'profile.district': 'District',
-    'profile.idProofType': 'Farmer identity document',
-    'profile.idProof.none': 'Choose document type',
-    'profile.idProof.aadhaar': 'Aadhaar',
-    'profile.idProof.voter': 'Voter ID',
-    'profile.idProof.pan': 'PAN',
-    'profile.idProof.farmer': 'Farmer registration / state farmer ID',
-    'profile.idProof.kcc': 'Kisan Credit Card (KCC)',
-    'profile.idProof.other': 'Other government ID',
-    'profile.status': 'Verification status',
-    'profile.notVerified': 'Not verified',
-    'profile.verifyNote': 'This profile is stored on this device for the demo. Official identity verification requires a secure backend integration; this screen does not verify Aadhaar or any government ID.',
-    'profile.localOnly': 'Demo profile — saved only in this browser',
-    'profile.namePlaceholder': 'Enter your full name',
-    'profile.phonePlaceholder': '10-digit mobile number',
-    'profile.statePlaceholder': 'e.g. Telangana',
-    'profile.districtPlaceholder': 'Enter your district',
-    'profile.save': 'Save profile',
-    'profile.close': 'Close profile',
-    'profile.saved': 'Profile saved on this device.',
-    'profile.saveError': 'The profile could not be saved in this browser. Check browser storage settings and try again.',
-    'profile.avatarAlt': 'Farmer profile photo',
-    'profile.photoHint': 'Add your photo at public/images/profile/farmer-profile.jpg',
-    'ai.voiceInput': 'Speak your question',
-    'ai.stopListening': 'Stop listening',
-    'ai.voiceOutput': 'Read answer aloud',
-    'ai.stopVoice': 'Stop voice output',
-    'ai.voiceUnsupported': 'Voice input is not supported by this browser. You can type your question instead.',
-    'ai.voiceOutputUnsupported': 'Voice output is not supported by this browser.',
-    'ai.voiceError': 'Voice input could not be started. Please try again or type your question.',
-    'ai.listening': 'Listening… speak your farming question now.',
+export function isSupportedLanguage(code) {
+  return Object.prototype.hasOwnProperty.call(translations, code);
+}
 
+/** Interpolate `{name}` placeholders. Missing params render as the key token. */
+export function interpolate(template, params) {
+  if (!params) return template;
+  return template.replace(/\{(\w+)\}/g, (match, name) =>
+    Object.prototype.hasOwnProperty.call(params, name) ? String(params[name]) : match,
+  );
+}
 
-    // Common
-    'common.viewAll': 'View All',
-    'common.back': 'Back',
-    'common.backToCrops': 'Back to Crops',
-    'common.cancel': 'Cancel',
-    'common.save': 'Save',
-    'common.close': 'Close',
-    'common.retry': 'Retry',
-    'common.loading': 'Loading…',
-    'common.search': 'Search',
-    'common.demoData': 'Demo data',
-    'common.liveData': 'Live data',
-    'common.notAvailable': 'Not available',
-    'common.demoBadge': 'DEMO',
-    'common.optional': 'optional',
-    'common.date': 'Date',
-    'common.details': 'Details',
-    'common.learnMore': 'Learn more',
-    'common.today': 'Today',
-    'common.language': 'Language',
+/**
+ * Lookup a key in a language with English fallback. Returns the key itself
+ * when it exists in no dictionary (visible signal instead of blank UI).
+ */
+export function translate(lang, key, params) {
+  const dict = translations[lang] || translations[DEFAULT_LANGUAGE];
+  const value = dict[key] ?? translations[DEFAULT_LANGUAGE][key];
+  if (value === undefined) return key;
+  return interpolate(value, params);
+}
 
-    // States
-    'state.loading.title': 'Loading information…',
-    'state.error.title': 'Something went wrong',
-    'state.error.body':
-      'We could not load this information right now. Please check your connection and try again.',
-    'state.empty.title': 'Nothing here yet',
-    'state.empty.body': 'No records are available to display.',
+/** Stable dictionary keys for locale-neutral catalogue entries. */
+export const cropNameKey = (cropId) => `cropName.${cropId}`;
+export const cropDescKey = (cropId) => `cropDesc.${cropId}`;
 
-    // Home
-    'home.hero.line1': 'Smarter Farming',
-    'home.hero.line2': 'Healthier Harvests',
-    'home.hero.desc':
-      'Get crop advice, weather insights, market prices and manage your farm — all in one place.',
-    'home.hero.ctaCrops': 'Explore Crops',
-    'home.hero.ctaAssistant': 'Ask AI',
-    'home.aiCard.title': 'AI Farm Assistant',
-    'home.aiCard.desc': 'Ask anything about crops, weather, storage or market prices.',
-    'home.aiCard.button': 'Ask AI',
-    'home.quick.crop.title': 'Crop Guidance',
-    'home.quick.crop.desc': 'AI-powered recommendations',
-    'home.quick.weather.title': 'Weather Analysis',
-    'home.quick.weather.desc': 'Real-time forecast and alerts',
-    'home.quick.market.title': 'Market Prices',
-    'home.quick.market.desc': 'Latest rates and trends',
-    'home.quick.diary.title': 'Farmer Diary',
-    'home.quick.diary.desc': 'Track your farm activities',
-    'home.explore.title': 'Explore Crops',
-    'home.search.placeholder': 'Search crops…',
-    'home.search.noResults': 'No crops match your search.',
-    'home.search.hint': 'Search by crop name, category or keyword',
-    'hero.farmerAlt': 'Farmer standing in a green field',
-
-    // Crop categories
-    'category.vegetable': 'Vegetable',
-    'category.fruit': 'Fruit',
-    'category.field': 'Field Crop',
-    'category.all': 'All Categories',
-
-    // Crops page
-    'crops.title': 'Crops',
-    'crops.subtitle': 'Browse the crop catalogue and open crop-specific guidance.',
-    'crops.search.placeholder': 'Search crops by name or keyword…',
-    'crops.popular': 'Popular Crop',
-
-    // Crop details
-    'crop.quickFacts': 'Quick Facts',
-    'crop.growingSeason': 'Growing Season',
-    'crop.harvestTime': 'Harvest Time',
-    'crop.idealTemperature': 'Ideal Temperature',
-    'crop.idealHumidity': 'Ideal Humidity',
-    'crop.storageLife': 'Storage Life',
-    'crop.tab.overview': 'Overview',
-    'crop.tab.weather': 'Weather & Suitability',
-    'crop.tab.storage': 'Storage Tips',
-    'crop.tab.market': 'Market Price',
-    'crop.tab.ai': 'AI Advisory',
-    'crop.duration': 'Crop Duration',
-    'crop.overview.title': 'Overview',
-    'crop.growingGuidance': 'Growing guidance',
-    'crop.sourceNote':
-      'Reference agronomic values — pending verification against the FarmShield backend data source.',
-    'crop.weatherTab.location': 'Selected location',
-    'crop.weatherTab.current': 'Current reported weather',
-    'crop.weatherTab.assessment': 'Crop-suitability assessment',
-    'crop.weatherTab.pending':
-      'Suitability assessment is pending — an approved analysis is not available yet.',
-    'crop.weatherTab.demoNote':
-      'Illustrative assessment based on demo weather only — not a verified analysis.',
-    'crop.weatherTab.outdoorNote':
-      'Values describe outdoor field weather, not crop-health observations or indoor storage conditions.',
-    'crop.storageTab.title': 'Storage guidance',
-    'crop.storageTab.handle': 'Handling',
-    'crop.storageTab.ventilation': 'Ventilation',
-    'crop.storageTab.moisture': 'Moisture management',
-    'crop.storageTab.inspection': 'Inspection',
-    'crop.storageTab.risks': 'Known risks & warning signs',
-    'crop.storageTab.source': 'Evidence & sources',
-    'crop.marketTab.title': 'Market price',
-    'crop.marketTab.market': 'Market',
-    'crop.marketTab.reported': 'Reporting date',
-    'crop.marketTab.unit': 'Unit',
-    'crop.marketTab.price': 'Reported price',
-    'crop.marketTab.more': 'View detailed market information',
-    'crop.aiTab.title': 'Ask about this crop',
-    'crop.aiTab.placeholder': 'e.g. How should I store {crop} after harvest?',
-    'crop.aiTab.send': 'Send question',
-    'crop.aiTab.context': 'Crop context: {crop}',
-    'crop.analysis.weatherTitle': 'Current Weather for Your Area',
-    'crop.analysis.suitabilityTitle': 'Suitability Status',
-    'crop.analysis.aiTitle': 'AI Recommendation',
-    'crop.analysis.checkWeather': 'Location',
-    'crop.analysis.humidity': 'Humidity',
-    'crop.analysis.rainChance': 'Rain chance',
-    'crop.analysis.wind': 'Wind speed',
-    'crop.analysis.temperature': 'Temperature',
-    'crop.growthStages': 'Growth Stages',
-    'crop.growthStages.note':
-      'Stage names and durations are reference values for this crop and are pending backend verification.',
-    'crop.stage.sowing': 'Sowing',
-    'crop.stage.seedling': 'Seedling',
-    'crop.stage.vegetative': 'Vegetative',
-    'crop.stage.flowering': 'Flowering',
-    'crop.stage.fruiting': 'Fruiting / Bulb Formation',
-    'crop.stage.maturity': 'Maturity',
-    'crop.stage.harvest': 'Harvest',
-    'crop.notFound.title': 'Crop not found',
-    'crop.notFound.body': 'This crop is not available in the catalogue.',
-
-    // Weather page
-    'weather.title': 'Weather Analysis',
-    'weather.subtitle': 'Forecast, crop impact and alerts for your farm location.',
-    'weather.changeLocation': 'Change Location',
-    'weather.locationLabel': 'Location',
-    'weather.reported': 'Reported',
-    'weather.current': 'Current Conditions',
-    'weather.temperature': 'Temperature',
-    'weather.condition': 'Condition',
-    'weather.humidity': 'Humidity',
-    'weather.rainChance': 'Rain probability',
-    'weather.wind': 'Wind speed',
-    'weather.forecast': '5-Day Forecast',
-    'weather.impact.title': 'Weather Impact on Crops',
-    'weather.impact.subtitle': 'Based on your selected crops and the demo forecast.',
-    'weather.charts.title': 'Forecast Charts',
-    'weather.chart.temp': 'Temperature forecast (°C)',
-    'weather.chart.rain': 'Rainfall forecast (mm)',
-    'weather.alerts.title': 'Weather Alerts',
-    'weather.alerts.none': 'No active alerts from the configured provider.',
-    'weather.aiInsights.title': 'AI Weather Insights',
-    'weather.aiInsights.subtitle':
-      'AI interpretation of the available forecast — provider values above remain the source of record.',
-    'weather.ai.unavailable': 'AI weather insights are unavailable right now.',
-    'weather.unit.celsius': '°C',
-    'weather.unit.mm': 'mm',
-    'weather.unit.kph': 'km/h',
-    'weather.unit.percent': '%',
-    'weather.day': 'Day',
-    'weather.rainLabel': 'Rain',
-    'weather.chartDay': 'Day',
-
-    // Market
-    'market.title': "Today's Market Prices",
-    'market.subtitle':
-      'Reported mandi rates. Prices depend on market, date, grade and unit — always check the reporting details.',
-    'market.filter.market': 'Market',
-    'market.filter.category': 'Category',
-    'market.filter.date': 'Reporting date',
-    'market.filter.search': 'Search crops…',
-    'market.unit': 'Unit',
-    'market.price': 'Price',
-    'market.viewDetails': 'View Details',
-    'market.reportedOn': 'Reported on',
-    'market.change.vsPrevious': 'vs previous report',
-    'market.change.up': 'Price increased',
-    'market.change.down': 'Price decreased',
-    'market.change.flat': 'No change',
-    'market.details.title': 'Price details',
-    'market.details.crop': 'Crop',
-    'market.details.market': 'Market',
-    'market.details.date': 'Reporting date',
-    'market.details.price': 'Price and unit',
-    'market.details.grade': 'Grade',
-    'market.details.source': 'Data source',
-    'market.details.trend': 'Reported trend (demo history)',
-    'market.details.comparables': 'Comparable markets',
-    'market.details.noComparables': 'Comparable-market data is not supported yet.',
-    'market.stale': 'This report may be stale — check the reporting date.',
-    'market.missing':
-      'Current market data is missing for this crop. Reported prices are unavailable.',
-    'market.selectPrompt': 'Select a crop card to see its price details.',
-    'market.disclaimer':
-      'Reported prices are observations only. FarmShield does not promise future selling prices.',
-
-    // Diary
-    'diary.title': 'My Farm Diary',
-    'diary.subtitle': 'Review farm activities and record new events.',
-    'diary.add': '+ Add New Entry',
-    'diary.filter.all': 'All Entries',
-    'diary.filter.crop': 'Crop Activities',
-    'diary.filter.expense': 'Expenses',
-    'diary.filter.harvest': 'Harvest',
-    'diary.filter.notes': 'Notes',
-    'diary.entry.sowing': 'Sowing',
-    'diary.entry.fertilizer': 'Fertilizer Applied',
-    'diary.entry.irrigation': 'Irrigation',
-    'diary.entry.pest': 'Pest Observation',
-    'diary.entry.harvest': 'Harvesting',
-    'diary.entry.expense': 'Expense',
-    'diary.entry.note': 'Note',
-    'diary.form.title': 'Add New Diary Entry',
-    'diary.form.date': 'Date',
-    'diary.form.activityType': 'Activity type',
-    'diary.form.crop': 'Crop or batch',
-    'diary.form.description': 'Activity description',
-    'diary.form.quantity': 'Quantity',
-    'diary.form.unit': 'Unit',
-    'diary.form.expense': 'Expense amount (₹)',
-    'diary.form.notes': 'Notes',
-    'diary.form.save': 'Save Entry',
-    'diary.form.required': 'This field is required',
-    'diary.form.invalidNumber': 'Enter a valid number',
-    'diary.form.success': 'Diary entry saved.',
-    'diary.form.failed':
-      'The entry could not be saved. Your input has been kept — please try again.',
-    'diary.summary.total': 'Total Entries',
-    'diary.summary.crops': 'Active Crops',
-    'diary.summary.completed': 'Tasks Completed',
-    'diary.summary.pending': 'Pending Tasks',
-    'diary.empty': 'No diary entries match this filter.',
-    'diary.demoNote': 'Demo entries are stored in this browser only.',
-    'diary.viewDetail': 'Open entry details',
-
-    // AI assistant
-    'ai.title': 'AI Farm Assistant',
-    'ai.subtitle':
-      'Ask about crops, storage, weather, market prices or your diary. Answers come from the FarmShield backend AI service.',
-    'ai.placeholder': 'Type your question…',
-    'ai.send': 'Send',
-    'ai.thinking': 'Thinking…',
-    'ai.suggestion.storage': 'How should I store onions after harvest?',
-    'ai.suggestion.weather': 'What does this week’s rain mean for my crops?',
-    'ai.suggestion.market': 'When should I sell my tomato harvest?',
-    'ai.suggestion.diary': 'Suggest a pest-check routine for my diary.',
-    'ai.summary': 'Summary',
-    'ai.observations': 'Observations',
-    'ai.actions': 'Recommended actions',
-    'ai.avoid': 'Actions to avoid',
-    'ai.sources': 'Sources',
-    'ai.uncertainty': 'Uncertainty',
-    'ai.followup': 'Follow-up questions',
-    'ai.demoAnswer.title': 'Demo response',
-    'ai.demoAnswer.body':
-      'The AI backend is not connected, so this is a static demonstration answer — it is not live AI output. Connect the backend AI endpoint to receive real answers.',
-    'ai.error.title': 'Assistant unavailable',
-    'ai.error.body':
-      'The AI request could not be completed. Your question has been kept — you can retry safely.',
-    'ai.retry': 'Retry send',
-    'ai.contextChip': 'Context: {crop}',
-    'ai.providerNote': 'Answer generated by the FarmShield AI service',
-
-    // Language / profile
-    'lang.select': 'Language',
-    'profile.title': 'Farmer profile',
-    'profile.signedOut': 'No profile is connected. Authentication will use the backend when available.',
-    'profile.demoUser': 'Demo farmer (not a real account)',
-
-    // Misc units
-    'unit.quintal': 'quintal',
-    'unit.rupee': '₹',
-  },
-
-  te: {
-    // Brand / global
-    'app.name': 'ఫార్మ్‌షీల్డ్',
-    'app.demoBanner':
-      'డెమో మోడ్ — లేఅవుట్ పరీక్ష కోసం నమూనా డేటా చూపబడుతోంది. లైవ్ డేటా కోసం ఫార్మ్‌షీల్డ్ బ్యాకెండ్‌ను (VITE_API_BASE_URL) కనెక్ట్ చేయండి.',
-    'app.footer':
-      'ఫార్మ్‌షీల్డ్ — వ్యవసాయ సాంకేతిక వేదిక. డెమో మోడ్‌లో చూపిన డేటా కేవలం ఉదాహరణ మాత్రమే.',
-
-    // Navigation
-    'nav.home': 'హోమ్',
-    'nav.crops': 'పంటలు',
-    'nav.weather': 'వాతావరణ విశ్లేషణ',
-    'nav.market': 'మార్కెట్ ధరలు',
-    'nav.diary': 'రైతు డైరీ',
-    'nav.menu': 'మెనూ',
-    'nav.profile': 'ప్రొఫైల్',
-    'nav.assistant': 'AI వ్యవసాయ సహాయకుడు',
-
-    // Common
-    'common.viewAll': 'అన్నీ చూడండి',
-    'common.back': 'వెనుకకు',
-    'common.backToCrops': 'పంటలకు తిరిగి వెళ్లండి',
-    'common.cancel': 'రద్దు చేయండి',
-    'common.save': 'సేవ్ చేయండి',
-    'common.close': 'మూసివేయండి',
-    'common.retry': 'మళ్లీ ప్రయత్నించండి',
-    'common.loading': 'లోడ్ అవుతోంది…',
-    'common.search': 'శోధన',
-    'common.demoData': 'డెమో డేటా',
-    'common.liveData': 'లైవ్ డేటా',
-    'common.notAvailable': 'అందుబాటులో లేదు',
-    'common.demoBadge': 'డెమో',
-    'common.optional': 'ఐచ్ఛికం',
-    'common.date': 'తేదీ',
-    'common.details': 'వివరాలు',
-    'common.learnMore': 'మరింత తెలుసుకోండి',
-    'common.today': 'ఈ రోజు',
-    'common.language': 'భాష',
-
-    // States
-    'state.loading.title': 'సమాచారం లోడ్ అవుతోంది…',
-    'state.error.title': 'ఏదో తప్పు జరిగింది',
-    'state.error.body':
-      'ఈ సమాచారాన్ని ప్రస్తుతం లోడ్ చేయలేకపోయాము. మీ కనెక్షన్‌ను తనిఖీ చేసి మళ్లీ ప్రయత్నించండి.',
-    'state.empty.title': 'ఇంకా ఏమీ లేదు',
-    'state.empty.body': 'చూపడానికి రికార్డులు ఏవీ అందుబాటులో లేవు.',
-
-    // Home
-    'home.hero.line1': 'తెలివైన వ్యవసాయం',
-    'home.hero.line2': 'ఆరోగ్యకరమైన పంటలు',
-    'home.hero.desc':
-      'పంట సలహాలు, వాతావరణ అవగాహన, మార్కెట్ ధరలు పొందండి — మీ వ్యవసాయాన్ని ఒకే చోట నిర్వహించండి.',
-    'home.hero.ctaCrops': 'పంటలను అన్వేషించండి',
-    'home.hero.ctaAssistant': 'AIని అడగండి',
-    'home.aiCard.title': 'AI వ్యవసాయ సహాయకుడు',
-    'home.aiCard.desc': 'పంటలు, వాతావరణం, నిల్వ, మార్కెట్ ధరల గురించి ఏదైనా అడగండి.',
-    'home.aiCard.button': 'AIని అడగండి',
-    'home.quick.crop.title': 'పంట మార్గదర్శకత్వం',
-    'home.quick.crop.desc': 'AI ఆధారిత సిఫార్సులు',
-    'home.quick.weather.title': 'వాతావరణ విశ్లేషణ',
-    'home.quick.weather.desc': 'రియల్-టైమ్ సూచనలు మరియు హెచ్చరికలు',
-    'home.quick.market.title': 'మార్కెట్ ధరలు',
-    'home.quick.market.desc': 'తాజా ధరలు మరియు ధోరణులు',
-    'home.quick.diary.title': 'రైతు డైరీ',
-    'home.quick.diary.desc': 'మీ వ్యవసాయ కార్యకలాపాలను ట్రాక్ చేయండి',
-    'home.explore.title': 'పంటలను అన్వేషించండి',
-    'home.search.placeholder': 'పంటలను శోధించండి…',
-    'home.search.noResults': 'మీ శోధనకు సరిపోలే పంటలు లేవు.',
-    'home.search.hint': 'పంట పేరు, వర్గం లేదా కీవర్డ్ ద్వారా శోధించండి',
-    'hero.farmerAlt': 'ఆకుపచ్చ పొలంలో నిలబడిన రైతు',
-
-    // Crop categories
-    'category.vegetable': 'కూరగాయలు',
-    'category.fruit': 'పండ్లు',
-    'category.field': 'ప్రధాన పంటలు',
-    'category.all': 'అన్ని వర్గాలు',
-
-    // Crops page
-    'crops.title': 'పంటలు',
-    'crops.subtitle': 'పంట జాబితాను చూడండి మరియు పంట-నిర్దిష్ట మార్గదర్శకత్వాన్ని తెరవండి.',
-    'crops.search.placeholder': 'పేరు లేదా కీవర్డ్ ద్వారా పంటలను శోధించండి…',
-    'crops.popular': 'ప్రసిద్ధ పంట',
-
-    // Crop details
-    'crop.quickFacts': 'త్వరిత వాస్తవాలు',
-    'crop.growingSeason': 'పెంపకం సీజన్',
-    'crop.harvestTime': 'కోత సమయం',
-    'crop.idealTemperature': 'ఆదర్శ ఉష్ణోగ్రత',
-    'crop.idealHumidity': 'ఆదర్శ తేమ',
-    'crop.storageLife': 'నిల్వ కాలం',
-    'crop.tab.overview': 'అవలోకనం',
-    'crop.tab.weather': 'వాతావరణం & అనుకూలత',
-    'crop.tab.storage': 'నిల్వ చిట్కాలు',
-    'crop.tab.market': 'మార్కెట్ ధర',
-    'crop.tab.ai': 'AI సలహా',
-    'crop.duration': 'పంట వ్యవధి',
-    'crop.overview.title': 'అవలోకనం',
-    'crop.growingGuidance': 'పెంపకం మార్గదర్శకత్వం',
-    'crop.sourceNote':
-      'సూచనాత్మక వ్యవసాయ విలువలు — ఫార్మ్‌షీల్డ్ బ్యాకెండ్ డేటా మూలంతో ధృవీకరణ పెండింగ్‌లో ఉంది.',
-    'crop.weatherTab.location': 'ఎంపిక చేసిన ప్రదేశం',
-    'crop.weatherTab.current': 'ప్రస్తుత వాతావరణం',
-    'crop.weatherTab.assessment': 'పంట-అనుకూలత అంచనా',
-    'crop.weatherTab.pending': 'అనుకూలత అంచనా పెండింగ్‌లో ఉంది — ఆమోదించిన విశ్లేషణ ఇంకా అందుబాటులో లేదు.',
-    'crop.weatherTab.demoNote':
-      'డెమో వాతావరణం ఆధారంగా ఉదాహరణ అంచనా మాత్రమే — ధృవీకరించిన విశ్లేషణ కాదు.',
-    'crop.weatherTab.outdoorNote':
-      'విలువలు బహిరంగ పొలం వాతావరణాన్ని సూచిస్తాయి, పంట ఆరోగ్య పరిశీలనలు లేదా ఇండోర్ నిల్వ పరిస్థితులు కావు.',
-    'crop.storageTab.title': 'నిల్వ మార్గదర్శకత్వం',
-    'crop.storageTab.handle': 'నిర్వహణ',
-    'crop.storageTab.ventilation': 'గాలి ప్రసరణ',
-    'crop.storageTab.moisture': 'తేమ నిర్వహణ',
-    'crop.storageTab.inspection': 'తనిఖీ',
-    'crop.storageTab.risks': 'తెలిసిన ప్రమాదాలు & హెచ్చరిక సంకేతాలు',
-    'crop.storageTab.source': 'ఆధారాలు & మూలాలు',
-    'crop.marketTab.title': 'మార్కెట్ ధర',
-    'crop.marketTab.market': 'మార్కెట్',
-    'crop.marketTab.reported': 'నివేదించిన తేదీ',
-    'crop.marketTab.unit': 'యూనిట్',
-    'crop.marketTab.price': 'నివేదించిన ధర',
-    'crop.marketTab.more': 'వివరమైన మార్కెట్ సమాచారం చూడండి',
-    'crop.aiTab.title': 'ఈ పంట గురించి అడగండి',
-    'crop.aiTab.placeholder': 'ఉదా. {crop} కోత తర్వాత ఎలా నిల్వ చేయాలి?',
-    'crop.aiTab.send': 'ప్రశ్న పంపండి',
-    'crop.aiTab.context': 'పంట సందర్భం: {crop}',
-    'crop.analysis.weatherTitle': 'మీ ప్రాంతంలో ప్రస్తుత వాతావరణం',
-    'crop.analysis.suitabilityTitle': 'అనుకూలత స్థితి',
-    'crop.analysis.aiTitle': 'AI సిఫార్సు',
-    'crop.analysis.checkWeather': 'ప్రదేశం',
-    'crop.analysis.humidity': 'తేమ',
-    'crop.analysis.rainChance': 'వర్ష అవకాశం',
-    'crop.analysis.wind': 'గాలి వేగం',
-    'crop.analysis.temperature': 'ఉష్ణోగ్రత',
-    'crop.growthStages': 'పెరుగుదల దశలు',
-    'crop.growthStages.note':
-      'దశల పేర్లు మరియు వ్యవధులు ఈ పంటకు సూచనాత్మక విలువలు మరియు బ్యాకెండ్ ధృవీకరణ పెండింగ్‌లో ఉన్నాయి.',
-    'crop.stage.sowing': 'విత్తనం',
-    'crop.stage.seedling': 'మొలక',
-    'crop.stage.vegetative': 'వానస్పతిక దశ',
-    'crop.stage.flowering': 'పుష్పోత్పత్తి',
-    'crop.stage.fruiting': 'కాయ/దుంప ఏర్పాటు',
-    'crop.stage.maturity': 'పక్వం',
-    'crop.stage.harvest': 'కోత',
-    'crop.notFound.title': 'పంట కనబడలేదు',
-    'crop.notFound.body': 'ఈ పంట జాబితాలో అందుబాటులో లేదు.',
-
-    // Weather page
-    'weather.title': 'వాతావరణ విశ్లేషణ',
-    'weather.subtitle': 'మీ వ్యవసాయ ప్రదేశానికి సూచనలు, పంట ప్రభావం మరియు హెచ్చరికలు.',
-    'weather.changeLocation': 'ప్రదేశాన్ని మార్చండి',
-    'weather.locationLabel': 'ప్రదేశం',
-    'weather.reported': 'నివేదించిన సమయం',
-    'weather.current': 'ప్రస్తుత పరిస్థితులు',
-    'weather.temperature': 'ఉష్ణోగ్రత',
-    'weather.condition': 'పరిస్థితి',
-    'weather.humidity': 'తేమ',
-    'weather.rainChance': 'వర్ష సంభావ్యత',
-    'weather.wind': 'గాలి వేగం',
-    'weather.forecast': '5-రోజుల సూచన',
-    'weather.impact.title': 'పంటలపై వాతావరణ ప్రభావం',
-    'weather.impact.subtitle': 'మీ ఎంపిక పంటలు మరియు డెమో సూచన ఆధారంగా.',
-    'weather.charts.title': 'సూచన చార్టులు',
-    'weather.chart.temp': 'ఉష్ణోగ్రత సూచన (°C)',
-    'weather.chart.rain': 'వర్షపాతం సూచన (మి.మీ)',
-    'weather.alerts.title': 'వాతావరణ హెచ్చరికలు',
-    'weather.alerts.none': 'కాన్ఫిగర్ చేసిన ప్రొవైడర్ నుండి క్రియాశీల హెచ్చరికలు లేవు.',
-    'weather.aiInsights.title': 'AI వాతావరణ అంతర్దృష్టులు',
-    'weather.aiInsights.subtitle':
-      'అందుబాటులో ఉన్న సూచన యొక్క AI వివరణ — పైన ఉన్న ప్రొవైడర్ విలువలే అధికారిక మూలం.',
-    'weather.ai.unavailable': 'AI వాతావరణ అంతర్దృష్టులు ప్రస్తుతం అందుబాటులో లేవు.',
-    'weather.unit.celsius': '°C',
-    'weather.unit.mm': 'మి.మీ',
-    'weather.unit.kph': 'కి.మీ/గం',
-    'weather.unit.percent': '%',
-    'weather.day': 'రోజు',
-    'weather.rainLabel': 'వర్షం',
-    'weather.chartDay': 'రోజు',
-
-    // Market
-    'market.title': 'ఈ రోజు మార్కెట్ ధరలు',
-    'market.subtitle':
-      'నివేదించిన మండి ధరలు. ధరలు మార్కెట్, తేదీ, గ్రేడ్ మరియు యూనిట్‌పై ఆధారపడతాయి — నివేదిక వివరాలను తనిఖీ చేయండి.',
-    'market.filter.market': 'మార్కెట్',
-    'market.filter.category': 'వర్గం',
-    'market.filter.date': 'నివేదించిన తేదీ',
-    'market.filter.search': 'పంటలను శోధించండి…',
-    'market.unit': 'యూనిట్',
-    'market.price': 'ధర',
-    'market.viewDetails': 'వివరాలు చూడండి',
-    'market.reportedOn': 'నివేదించిన తేదీ',
-    'market.change.vsPrevious': 'మునుపటి నివేదికతో పోలిస్తే',
-    'market.change.up': 'ధర పెరిగింది',
-    'market.change.down': 'ధర తగ్గింది',
-    'market.change.flat': 'మార్పు లేదు',
-    'market.details.title': 'ధర వివరాలు',
-    'market.details.crop': 'పంట',
-    'market.details.market': 'మార్కెట్',
-    'market.details.date': 'నివేదించిన తేదీ',
-    'market.details.price': 'ధర మరియు యూనిట్',
-    'market.details.grade': 'గ్రేడ్',
-    'market.details.source': 'డేటా మూలం',
-    'market.details.trend': 'నివేదించిన ధోరణి (డెమో చరిత్ర)',
-    'market.details.comparables': 'సారూప్య మార్కెట్లు',
-    'market.details.noComparables': 'సారూప్య-మార్కెట్ డేటా ఇంకా మద్దతు లేదు.',
-    'market.stale': 'ఈ నివేదిక పాతది కావచ్చు — నివేదించిన తేదీని తనిఖీ చేయండి.',
-    'market.missing': 'ఈ పంటకు ప్రస్తుత మార్కెట్ డేటా లేదు. నివేదించిన ధరలు అందుబాటులో లేవు.',
-    'market.selectPrompt': 'ధర వివరాలు చూడటానికి పంట కార్డ్‌ను ఎంచుకోండి.',
-    'market.disclaimer':
-      'నివేదించిన ధరలు కేవలం పరిశీలనలు మాత్రమే. ఫార్మ్‌షీల్డ్ భవిష్యత్ అమ్మకపు ధరలను హామీ ఇవ్వదు.',
-
-    // Diary
-    'diary.title': 'నా పొలం డైరీ',
-    'diary.subtitle': 'వ్యవసాయ కార్యకలాపాలను సమీక్షించండి మరియు కొత్త సంఘటనలను నమోదు చేయండి.',
-    'diary.add': '+ కొత్త ఎంట్రీ జోడించండి',
-    'diary.filter.all': 'అన్ని ఎంట్రీలు',
-    'diary.filter.crop': 'పంట కార్యకలాపాలు',
-    'diary.filter.expense': 'ఖర్చులు',
-    'diary.filter.harvest': 'కోత',
-    'diary.filter.notes': 'గమనికలు',
-    'diary.entry.sowing': 'విత్తనం',
-    'diary.entry.fertilizer': 'ఎరువులు వేసినది',
-    'diary.entry.irrigation': 'నీటిపారుదల',
-    'diary.entry.pest': 'చీడపీడల పరిశీలన',
-    'diary.entry.harvest': 'కోత',
-    'diary.entry.expense': 'ఖర్చు',
-    'diary.entry.note': 'గమనిక',
-    'diary.form.title': 'కొత్త డైరీ ఎంట్రీ జోడించండి',
-    'diary.form.date': 'తేదీ',
-    'diary.form.activityType': 'కార్యకలాప రకం',
-    'diary.form.crop': 'పంట లేదా బ్యాచ్',
-    'diary.form.description': 'కార్యకలాప వివరణ',
-    'diary.form.quantity': 'పరిమాణం',
-    'diary.form.unit': 'యూనిట్',
-    'diary.form.expense': 'ఖర్చు మొత్తం (₹)',
-    'diary.form.notes': 'గమనికలు',
-    'diary.form.save': 'ఎంట్రీ సేవ్ చేయండి',
-    'diary.form.required': 'ఈ ఫీల్డ్ అవసరం',
-    'diary.form.invalidNumber': 'సరైన సంఖ్యను నమోదు చేయండి',
-    'diary.form.success': 'డైరీ ఎంట్రీ సేవ్ అయింది.',
-    'diary.form.failed':
-      'ఎంట్రీని సేవ్ చేయలేకపోయాము. మీ నమోదు భద్రపరచబడింది — మళ్లీ ప్రయత్నించండి.',
-    'diary.summary.total': 'మొత్తం ఎంట్రీలు',
-    'diary.summary.crops': 'క్రియాశీల పంటలు',
-    'diary.summary.completed': 'పూర్తయిన పనులు',
-    'diary.summary.pending': 'పెండింగ్ పనులు',
-    'diary.empty': 'ఈ ఫిల్టర్‌కు సరిపోలే డైరీ ఎంట్రీలు లేవు.',
-    'diary.demoNote': 'డెమో ఎంట్రీలు ఈ బ్రౌజర్‌లో మాత్రమే నిల్వ చేయబడతాయి.',
-    'diary.viewDetail': 'ఎంట్రీ వివరాలు తెరవండి',
-
-    // AI assistant
-    'ai.title': 'AI వ్యవసాయ సహాయకుడు',
-    'ai.subtitle':
-      'పంటలు, నిల్వ, వాతావరణం, మార్కెట్ ధరలు లేదా మీ డైరీ గురించి అడగండి. సమాధానాలు ఫార్మ్‌షీల్డ్ బ్యాకెండ్ AI సేవ నుండి వస్తాయి.',
-    'ai.placeholder': 'మీ ప్రశ్నను టైప్ చేయండి…',
-    'ai.send': 'పంపండి',
-    'ai.thinking': 'ఆలోచిస్తోంది…',
-    'ai.suggestion.storage': 'కోత తర్వాత ఉల్లిపాయలను ఎలా నిల్వ చేయాలి?',
-    'ai.suggestion.weather': 'ఈ వారపు వర్షం నా పంటలకు ఏమి అర్థం?',
-    'ai.suggestion.market': 'నా టమాటా పంటను ఎప్పుడు అమ్మాలి?',
-    'ai.suggestion.diary': 'నా డైరీ కోసం చీడపీడల తనిఖీ దినచర్యను సూచించండి.',
-    'ai.summary': 'సారాంశం',
-    'ai.observations': 'పరిశీలనలు',
-    'ai.actions': 'సిఫార్సు చేసిన చర్యలు',
-    'ai.avoid': 'నివారించవలసిన చర్యలు',
-    'ai.sources': 'మూలాలు',
-    'ai.uncertainty': 'అనిశ్చితి',
-    'ai.followup': 'అనుసరణ ప్రశ్నలు',
-    'ai.demoAnswer.title': 'డెమో సమాధానం',
-    'ai.demoAnswer.body':
-      'AI బ్యాకెండ్ కనెక్ట్ కాలేదు, కాబట్టి ఇది స్థిరమైన డెమో సమాధానం — ఇది లైవ్ AI అవుట్‌పుట్ కాదు. నిజమైన సమాధానాల కోసం బ్యాకెండ్ AI ఎండ్‌పాయింట్‌ను కనెక్ట్ చేయండి.',
-    'ai.error.title': 'సహాయకుడు అందుబాటులో లేడు',
-    'ai.error.body':
-      'AI అభ్యర్థనను పూర్తి చేయలేకపోయాము. మీ ప్రశ్న భద్రపరచబడింది — సురక్షితంగా మళ్లీ ప్రయత్నించవచ్చు.',
-    'ai.retry': 'మళ్లీ పంపండి',
-    'ai.contextChip': 'సందర్భం: {crop}',
-    'ai.providerNote': 'ఫార్మ్‌షీల్డ్ AI సేవ ద్వారా రూపొందించిన సమాధానం',
-
-    // Language / profile
-    'lang.select': 'భాష',
-    'profile.title': 'రైతు ప్రొఫైల్',
-    'profile.signedOut': 'ప్రొఫైల్ కనెక్ట్ కాలేదు. బ్యాకెండ్ అందుబాటులో ఉన్నప్పుడు ప్రమాణీకరణ ఉపయోగించబడుతుంది.',
-    'profile.demoUser': 'డెమో రైతు (నిజమైన ఖాతా కాదు)',
-
-    // Misc units
-    'unit.quintal': 'క్వింటాల్',
-    'unit.rupee': '₹',
-  },
-};
-
-
-// Core UI translations for the requested Indian languages. The dictionary is
-// completed from English for any long-tail copy not yet translated; this avoids
-// blank labels while allowing translation coverage to grow safely over time.
-const supplementalLocaleOverrides = {
-  hi: {
-    'nav.home':'होम','nav.crops':'फसलें','nav.weather':'मौसम विश्लेषण','nav.market':'बाज़ार भाव','nav.diary':'किसान डायरी','nav.profile':'प्रोफ़ाइल','nav.assistant':'AI सहायक','nav.menu':'मेन्यू',
-    'common.save':'सहेजें','common.cancel':'रद्द करें','common.close':'बंद करें','common.search':'खोजें','common.back':'वापस','lang.select':'भाषा',
-    'category.vegetable':'सब्ज़ी','category.fruit':'फल','category.field':'खेत की फसल','category.all':'सभी श्रेणियाँ','crops.title':'फसलें',
-    'profile.title':'किसान प्रोफ़ाइल','profile.name':'पूरा नाम','profile.phone':'मोबाइल नंबर','profile.state':'राज्य','profile.district':'ज़िला','profile.idProofType':'किसान पहचान दस्तावेज़','profile.idProof.none':'दस्तावेज़ चुनें','profile.idProof.aadhaar':'आधार','profile.idProof.voter':'मतदाता पहचान पत्र','profile.idProof.pan':'पैन','profile.idProof.farmer':'किसान पंजीकरण / राज्य किसान ID','profile.idProof.kcc':'किसान क्रेडिट कार्ड (KCC)','profile.idProof.other':'अन्य सरकारी पहचान पत्र','profile.status':'सत्यापन स्थिति','profile.notVerified':'सत्यापित नहीं','profile.verifyNote':'यह डेमो प्रोफ़ाइल केवल इस डिवाइस पर सहेजी जाती है। आधिकारिक पहचान सत्यापन के लिए सुरक्षित बैकएंड आवश्यक है। यह स्क्रीन आधार या किसी सरकारी ID का सत्यापन नहीं करती।','profile.localOnly':'डेमो प्रोफ़ाइल — केवल इस ब्राउज़र में सहेजी गई','profile.namePlaceholder':'पूरा नाम दर्ज करें','profile.phonePlaceholder':'10 अंकों का मोबाइल नंबर','profile.statePlaceholder':'जैसे, तेलंगाना','profile.districtPlaceholder':'ज़िला दर्ज करें','profile.save':'प्रोफ़ाइल सहेजें','profile.close':'प्रोफ़ाइल बंद करें','profile.saved':'प्रोफ़ाइल इस डिवाइस पर सहेजी गई।','profile.avatarAlt':'किसान की प्रोफ़ाइल फ़ोटो','profile.photoHint':'फ़ोटो public/images/profile/farmer-profile.jpg में रखें',
-    'ai.voiceInput':'अपना सवाल बोलें','ai.stopListening':'सुनना बंद करें','ai.voiceOutput':'उत्तर सुनें','ai.stopVoice':'आवाज़ रोकें','ai.voiceUnsupported':'इस ब्राउज़र में वॉइस इनपुट उपलब्ध नहीं है। आप अपना सवाल टाइप कर सकते हैं।','ai.voiceOutputUnsupported':'इस ब्राउज़र में वॉइस आउटपुट उपलब्ध नहीं है।','ai.voiceError':'वॉइस इनपुट शुरू नहीं हो सका। दोबारा कोशिश करें या सवाल टाइप करें।','ai.listening':'सुन रहा है… अपना कृषि प्रश्न बोलें।'
-  },
-  ta: {
-    'nav.home':'முகப்பு','nav.crops':'பயிர்கள்','nav.weather':'வானிலை பகுப்பாய்வு','nav.market':'சந்தை விலைகள்','nav.diary':'விவசாயி நாட்குறிப்பு','nav.profile':'சுயவிவரம்','nav.assistant':'AI உதவியாளர்','nav.menu':'மெனு',
-    'common.save':'சேமி','common.cancel':'ரத்து செய்','common.close':'மூடு','common.search':'தேடு','common.back':'பின்','lang.select':'மொழி',
-    'category.vegetable':'காய்கறி','category.fruit':'பழம்','category.field':'வயல் பயிர்','category.all':'அனைத்து வகைகள்','crops.title':'பயிர்கள்',
-    'profile.title':'விவசாயி சுயவிவரம்','profile.name':'முழுப் பெயர்','profile.phone':'கைபேசி எண்','profile.state':'மாநிலம்','profile.district':'மாவட்டம்','profile.idProofType':'விவசாயி அடையாள ஆவணம்','profile.idProof.none':'ஆவணத்தைத் தேர்ந்தெடுக்கவும்','profile.idProof.aadhaar':'ஆதார்','profile.idProof.voter':'வாக்காளர் அடையாள அட்டை','profile.idProof.pan':'பான்','profile.idProof.farmer':'விவசாயி பதிவு / மாநில விவசாயி ID','profile.idProof.kcc':'கிசான் கடன் அட்டை (KCC)','profile.idProof.other':'மற்ற அரசு அடையாள ஆவணம்','profile.status':'சரிபார்ப்பு நிலை','profile.notVerified':'சரிபார்க்கப்படவில்லை','profile.verifyNote':'இந்த டெமோ சுயவிவரம் இந்த சாதனத்தில் மட்டுமே சேமிக்கப்படும். அதிகாரப்பூர்வ அடையாளச் சரிபார்ப்புக்கு பாதுகாப்பான பின்தள இணைப்பு தேவை. இந்தத் திரை ஆதார் அல்லது அரசு ID-ஐ சரிபார்க்காது.','profile.localOnly':'டெமோ சுயவிவரம் — இந்த உலாவியில் மட்டும் சேமிக்கப்பட்டது','profile.namePlaceholder':'முழுப் பெயரை உள்ளிடவும்','profile.phonePlaceholder':'10 இலக்க கைபேசி எண்','profile.statePlaceholder':'எ.கா., தெலங்கானா','profile.districtPlaceholder':'மாவட்டத்தை உள்ளிடவும்','profile.save':'சுயவிவரத்தைச் சேமி','profile.close':'சுயவிவரத்தை மூடு','profile.saved':'இந்தச் சாதனத்தில் சுயவிவரம் சேமிக்கப்பட்டது.','profile.avatarAlt':'விவசாயி சுயவிவரப் படம்','profile.photoHint':'படத்தை public/images/profile/farmer-profile.jpg இல் சேர்க்கவும்',
-    'ai.voiceInput':'உங்கள் கேள்வியைப் பேசவும்','ai.stopListening':'கேட்பதை நிறுத்து','ai.voiceOutput':'பதிலைப் படித்துக் கேள்','ai.stopVoice':'குரலை நிறுத்து','ai.voiceUnsupported':'இந்த உலாவியில் குரல் உள்ளீடு கிடைக்கவில்லை. கேள்வியைத் தட்டச்சு செய்யலாம்.','ai.voiceOutputUnsupported':'இந்த உலாவியில் குரல் வெளியீடு கிடைக்கவில்லை.','ai.voiceError':'குரல் உள்ளீட்டைத் தொடங்க முடியவில்லை. மீண்டும் முயற்சிக்கவும் அல்லது தட்டச்சு செய்யவும்.','ai.listening':'கேட்கிறது… உங்கள் விவசாயக் கேள்வியைப் பேசவும்.'
-  },
-  kn: {
-    'nav.home':'ಮುಖಪುಟ','nav.crops':'ಬೆಳೆಗಳು','nav.weather':'ಹವಾಮಾನ ವಿಶ್ಲೇಷಣೆ','nav.market':'ಮಾರುಕಟ್ಟೆ ಬೆಲೆಗಳು','nav.diary':'ರೈತರ ದಿನಚರಿ','nav.profile':'ಪ್ರೊಫೈಲ್','nav.assistant':'AI ಸಹಾಯಕ','nav.menu':'ಮೆನು',
-    'common.save':'ಉಳಿಸಿ','common.cancel':'ರದ್ದುಮಾಡಿ','common.close':'ಮುಚ್ಚಿ','common.search':'ಹುಡುಕಿ','common.back':'ಹಿಂದೆ','lang.select':'ಭಾಷೆ',
-    'category.vegetable':'ತರಕಾರಿ','category.fruit':'ಹಣ್ಣು','category.field':'ಕ್ಷೇತ್ರ ಬೆಳೆ','category.all':'ಎಲ್ಲಾ ವರ್ಗಗಳು','crops.title':'ಬೆಳೆಗಳು',
-    'profile.title':'ರೈತರ ಪ್ರೊಫೈಲ್','profile.name':'ಪೂರ್ಣ ಹೆಸರು','profile.phone':'ಮೊಬೈಲ್ ಸಂಖ್ಯೆ','profile.state':'ರಾಜ್ಯ','profile.district':'ಜಿಲ್ಲೆ','profile.idProofType':'ರೈತರ ಗುರುತಿನ ದಾಖಲೆ','profile.idProof.none':'ದಾಖಲೆ ಆಯ್ಕೆಮಾಡಿ','profile.idProof.aadhaar':'ಆಧಾರ್','profile.idProof.voter':'ಮತದಾರರ ಗುರುತಿನ ಚೀಟಿ','profile.idProof.pan':'ಪ್ಯಾನ್','profile.idProof.farmer':'ರೈತ ನೋಂದಣಿ / ರಾಜ್ಯ ರೈತ ID','profile.idProof.kcc':'ಕಿಸಾನ್ ಕ್ರೆಡಿಟ್ ಕಾರ್ಡ್ (KCC)','profile.idProof.other':'ಇತರೆ ಸರ್ಕಾರಿ ಗುರುತಿನ ದಾಖಲೆ','profile.status':'ಪರಿಶೀಲನೆ ಸ್ಥಿತಿ','profile.notVerified':'ಪರಿಶೀಲಿಸಲಾಗಿಲ್ಲ','profile.verifyNote':'ಈ ಡೆಮೊ ಪ್ರೊಫೈಲ್ ಈ ಸಾಧನದಲ್ಲೇ ಉಳಿಯುತ್ತದೆ. ಅಧಿಕೃತ ಗುರುತಿನ ಪರಿಶೀಲನೆಗೆ ಸುರಕ್ಷಿತ ಬ್ಯಾಕೆಂಡ್ ಅಗತ್ಯ. ಈ ಪರದೆ ಆಧಾರ್ ಅಥವಾ ಸರ್ಕಾರಿ ID ಪರಿಶೀಲಿಸುವುದಿಲ್ಲ.','profile.localOnly':'ಡೆಮೊ ಪ್ರೊಫೈಲ್ — ಈ ಬ್ರೌಸರ್‌ನಲ್ಲಿ ಮಾತ್ರ ಉಳಿಸಲಾಗಿದೆ','profile.namePlaceholder':'ಪೂರ್ಣ ಹೆಸರನ್ನು ನಮೂದಿಸಿ','profile.phonePlaceholder':'10 ಅಂಕಿಯ ಮೊಬೈಲ್ ಸಂಖ್ಯೆ','profile.statePlaceholder':'ಉದಾ., ತೆಲಂಗಾಣ','profile.districtPlaceholder':'ಜಿಲ್ಲೆ ನಮೂದಿಸಿ','profile.save':'ಪ್ರೊಫೈಲ್ ಉಳಿಸಿ','profile.close':'ಪ್ರೊಫೈಲ್ ಮುಚ್ಚಿ','profile.saved':'ಪ್ರೊಫೈಲ್ ಈ ಸಾಧನದಲ್ಲಿ ಉಳಿಸಲಾಗಿದೆ.','profile.avatarAlt':'ರೈತರ ಪ್ರೊಫೈಲ್ ಫೋಟೋ','profile.photoHint':'ಫೋಟೋವನ್ನು public/images/profile/farmer-profile.jpg ನಲ್ಲಿ ಇರಿಸಿ',
-    'ai.voiceInput':'ನಿಮ್ಮ ಪ್ರಶ್ನೆಯನ್ನು ಮಾತನಾಡಿ','ai.stopListening':'ಕೇಳುವುದನ್ನು ನಿಲ್ಲಿಸಿ','ai.voiceOutput':'ಉತ್ತರವನ್ನು ಕೇಳಿ','ai.stopVoice':'ಧ್ವನಿಯನ್ನು ನಿಲ್ಲಿಸಿ','ai.voiceUnsupported':'ಈ ಬ್ರೌಸರ್‌ನಲ್ಲಿ ಧ್ವನಿ ಇನ್‌ಪುಟ್ ಲಭ್ಯವಿಲ್ಲ. ಪ್ರಶ್ನೆಯನ್ನು ಟೈಪ್ ಮಾಡಬಹುದು.','ai.voiceOutputUnsupported':'ಈ ಬ್ರೌಸರ್‌ನಲ್ಲಿ ಧ್ವನಿ ಔಟ್‌ಪುಟ್ ಲಭ್ಯವಿಲ್ಲ.','ai.voiceError':'ಧ್ವನಿ ಇನ್‌ಪುಟ್ ಪ್ರಾರಂಭಿಸಲಾಗಲಿಲ್ಲ. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ ಅಥವಾ ಟೈಪ್ ಮಾಡಿ.','ai.listening':'ಕೇಳುತ್ತಿದೆ… ನಿಮ್ಮ ಕೃಷಿ ಪ್ರಶ್ನೆಯನ್ನು ಮಾತನಾಡಿ.'
-  },
-  ml: {
-    'nav.home':'ഹോം','nav.crops':'വിളകൾ','nav.weather':'കാലാവസ്ഥാ വിശകലനം','nav.market':'വിപണി വിലകൾ','nav.diary':'കർഷക ഡയറി','nav.profile':'പ്രൊഫൈൽ','nav.assistant':'AI സഹായി','nav.menu':'മെനു',
-    'common.save':'സേവ് ചെയ്യുക','common.cancel':'റദ്ദാക്കുക','common.close':'അടയ്ക്കുക','common.search':'തിരയുക','common.back':'തിരികെ','lang.select':'ഭാഷ',
-    'category.vegetable':'പച്ചക്കറി','category.fruit':'പഴം','category.field':'കൃഷിവിള','category.all':'എല്ലാ വിഭാഗങ്ങളും','crops.title':'വിളകൾ',
-    'profile.title':'കർഷക പ്രൊഫൈൽ','profile.name':'പൂർണ്ണനാമം','profile.phone':'മൊബൈൽ നമ്പർ','profile.state':'സംസ്ഥാനം','profile.district':'ജില്ല','profile.idProofType':'കർഷക തിരിച്ചറിയൽ രേഖ','profile.idProof.none':'രേഖ തിരഞ്ഞെടുക്കുക','profile.idProof.aadhaar':'ആധാർ','profile.idProof.voter':'വോട്ടർ ഐഡി','profile.idProof.pan':'പാൻ','profile.idProof.farmer':'കർഷക രജിസ്ട്രേഷൻ / സംസ്ഥാന കർഷക ID','profile.idProof.kcc':'കിസാൻ ക്രെഡിറ്റ് കാർഡ് (KCC)','profile.idProof.other':'മറ്റ് സർക്കാർ ഐഡി','profile.status':'സ്ഥിരീകരണ നില','profile.notVerified':'സ്ഥിരീകരിച്ചിട്ടില്ല','profile.verifyNote':'ഈ ഡെമോ പ്രൊഫൈൽ ഈ ഉപകരണത്തിൽ മാത്രം സേവ് ചെയ്യും. ഔദ്യോഗിക തിരിച്ചറിയൽ സ്ഥിരീകരണത്തിന് സുരക്ഷിതമായ ബാക്ക്എൻഡ് ആവശ്യമാണ്. ഈ സ്ക്രീൻ ആധാറോ സർക്കാർ ID-യോ സ്ഥിരീകരിക്കുന്നില്ല.','profile.localOnly':'ഡെമോ പ്രൊഫൈൽ — ഈ ബ്രൗസറിൽ മാത്രം സേവ് ചെയ്തു','profile.namePlaceholder':'പൂർണ്ണനാമം നൽകുക','profile.phonePlaceholder':'10 അക്ക മൊബൈൽ നമ്പർ','profile.statePlaceholder':'ഉദാ., തെലങ്കാന','profile.districtPlaceholder':'ജില്ല നൽകുക','profile.save':'പ്രൊഫൈൽ സേവ് ചെയ്യുക','profile.close':'പ്രൊഫൈൽ അടയ്ക്കുക','profile.saved':'പ്രൊഫൈൽ ഈ ഉപകരണത്തിൽ സേവ് ചെയ്തു.','profile.avatarAlt':'കർഷകന്റെ പ്രൊഫൈൽ ചിത്രം','profile.photoHint':'ചിത്രം public/images/profile/farmer-profile.jpg ൽ ചേർക്കുക',
-    'ai.voiceInput':'ചോദ്യം ശബ്ദമായി പറയുക','ai.stopListening':'കേൾക്കുന്നത് നിർത്തുക','ai.voiceOutput':'ഉത്തരം ശബ്ദമായി കേൾക്കുക','ai.stopVoice':'ശബ്ദം നിർത്തുക','ai.voiceUnsupported':'ഈ ബ്രൗസറിൽ ശബ്ദ ഇൻപുട്ട് ലഭ്യമല്ല. ചോദ്യം ടൈപ്പ് ചെയ്യാം.','ai.voiceOutputUnsupported':'ഈ ബ്രൗസറിൽ ശബ്ദ ഔട്ട്പുട്ട് ലഭ്യമല്ല.','ai.voiceError':'ശബ്ദ ഇൻപുട്ട് ആരംഭിക്കാൻ കഴിഞ്ഞില്ല. വീണ്ടും ശ്രമിക്കുക അല്ലെങ്കിൽ ടൈപ്പ് ചെയ്യുക.','ai.listening':'കേൾക്കുന്നു… നിങ്ങളുടെ കൃഷി ചോദ്യം പറയൂ.'
-  },
-  pa: {
-    'nav.home':'ਮੁੱਖ ਪੰਨਾ','nav.crops':'ਫ਼ਸਲਾਂ','nav.weather':'ਮੌਸਮ ਵਿਸ਼ਲੇਸ਼ਣ','nav.market':'ਮੰਡੀ ਭਾਅ','nav.diary':'ਕਿਸਾਨ ਡਾਇਰੀ','nav.profile':'ਪ੍ਰੋਫ਼ਾਈਲ','nav.assistant':'AI ਸਹਾਇਕ','nav.menu':'ਮੀਨੂ',
-    'common.save':'ਸੰਭਾਲੋ','common.cancel':'ਰੱਦ ਕਰੋ','common.close':'ਬੰਦ ਕਰੋ','common.search':'ਖੋਜੋ','common.back':'ਵਾਪਸ','lang.select':'ਭਾਸ਼ਾ',
-    'category.vegetable':'ਸਬਜ਼ੀ','category.fruit':'ਫਲ','category.field':'ਖੇਤ ਦੀ ਫ਼ਸਲ','category.all':'ਸਾਰੀਆਂ ਸ਼੍ਰੇਣੀਆਂ','crops.title':'ਫ਼ਸਲਾਂ',
-    'profile.title':'ਕਿਸਾਨ ਪ੍ਰੋਫ਼ਾਈਲ','profile.name':'ਪੂਰਾ ਨਾਮ','profile.phone':'ਮੋਬਾਈਲ ਨੰਬਰ','profile.state':'ਰਾਜ','profile.district':'ਜ਼ਿਲ੍ਹਾ','profile.idProofType':'ਕਿਸਾਨ ਪਛਾਣ ਦਸਤਾਵੇਜ਼','profile.idProof.none':'ਦਸਤਾਵੇਜ਼ ਚੁਣੋ','profile.idProof.aadhaar':'ਆਧਾਰ','profile.idProof.voter':'ਵੋਟਰ ID','profile.idProof.pan':'ਪੈਨ','profile.idProof.farmer':'ਕਿਸਾਨ ਰਜਿਸਟ੍ਰੇਸ਼ਨ / ਰਾਜ ਕਿਸਾਨ ID','profile.idProof.kcc':'ਕਿਸਾਨ ਕ੍ਰੈਡਿਟ ਕਾਰਡ (KCC)','profile.idProof.other':'ਹੋਰ ਸਰਕਾਰੀ ID','profile.status':'ਤਸਦੀਕ ਸਥਿਤੀ','profile.notVerified':'ਤਸਦੀਕ ਨਹੀਂ ਹੋਈ','profile.verifyNote':'ਇਹ ਡੈਮੋ ਪ੍ਰੋਫ਼ਾਈਲ ਸਿਰਫ਼ ਇਸ ਡਿਵਾਈਸ ਉੱਤੇ ਸੰਭਾਲੀ ਜਾਂਦੀ ਹੈ। ਅਧਿਕਾਰਤ ਪਛਾਣ ਤਸਦੀਕ ਲਈ ਸੁਰੱਖਿਅਤ ਬੈਕਐਂਡ ਲੋੜੀਂਦਾ ਹੈ। ਇਹ ਸਕ੍ਰੀਨ ਆਧਾਰ ਜਾਂ ਸਰਕਾਰੀ ID ਦੀ ਤਸਦੀਕ ਨਹੀਂ ਕਰਦੀ।','profile.localOnly':'ਡੈਮੋ ਪ੍ਰੋਫ਼ਾਈਲ — ਸਿਰਫ਼ ਇਸ ਬ੍ਰਾਊਜ਼ਰ ਵਿੱਚ ਸੰਭਾਲੀ','profile.namePlaceholder':'ਪੂਰਾ ਨਾਮ ਲਿਖੋ','profile.phonePlaceholder':'10 ਅੰਕਾਂ ਦਾ ਮੋਬਾਈਲ ਨੰਬਰ','profile.statePlaceholder':'ਜਿਵੇਂ, ਤੇਲੰਗਾਨਾ','profile.districtPlaceholder':'ਜ਼ਿਲ੍ਹਾ ਲਿਖੋ','profile.save':'ਪ੍ਰੋਫ਼ਾਈਲ ਸੰਭਾਲੋ','profile.close':'ਪ੍ਰੋਫ਼ਾਈਲ ਬੰਦ ਕਰੋ','profile.saved':'ਪ੍ਰੋਫ਼ਾਈਲ ਇਸ ਡਿਵਾਈਸ ਉੱਤੇ ਸੰਭਾਲੀ ਗਈ।','profile.avatarAlt':'ਕਿਸਾਨ ਦੀ ਪ੍ਰੋਫ਼ਾਈਲ ਤਸਵੀਰ','profile.photoHint':'ਤਸਵੀਰ public/images/profile/farmer-profile.jpg ਵਿੱਚ ਰੱਖੋ',
-    'ai.voiceInput':'ਆਪਣਾ ਸਵਾਲ ਬੋਲੋ','ai.stopListening':'ਸੁਣਨਾ ਬੰਦ ਕਰੋ','ai.voiceOutput':'ਜਵਾਬ ਸੁਣੋ','ai.stopVoice':'ਆਵਾਜ਼ ਰੋਕੋ','ai.voiceUnsupported':'ਇਸ ਬ੍ਰਾਊਜ਼ਰ ਵਿੱਚ ਆਵਾਜ਼ ਇਨਪੁੱਟ ਉਪਲਬਧ ਨਹੀਂ ਹੈ। ਤੁਸੀਂ ਸਵਾਲ ਟਾਈਪ ਕਰ ਸਕਦੇ ਹੋ।','ai.voiceOutputUnsupported':'ਇਸ ਬ੍ਰਾਊਜ਼ਰ ਵਿੱਚ ਆਵਾਜ਼ ਆਉਟਪੁੱਟ ਉਪਲਬਧ ਨਹੀਂ ਹੈ।','ai.voiceError':'ਆਵਾਜ਼ ਇਨਪੁੱਟ ਸ਼ੁਰੂ ਨਹੀਂ ਹੋ ਸਕਿਆ। ਮੁੜ ਕੋਸ਼ਿਸ਼ ਕਰੋ ਜਾਂ ਟਾਈਪ ਕਰੋ।','ai.listening':'ਸੁਣ ਰਿਹਾ ਹੈ… ਆਪਣਾ ਖੇਤੀਬਾੜੀ ਸਵਾਲ ਬੋਲੋ।'
-  },
-  bn: {
-    'nav.home':'হোম','nav.crops':'ফসল','nav.weather':'আবহাওয়া বিশ্লেষণ','nav.market':'বাজারদর','nav.diary':'কৃষক ডায়েরি','nav.profile':'প্রোফাইল','nav.assistant':'AI সহায়ক','nav.menu':'মেনু',
-    'common.save':'সংরক্ষণ করুন','common.cancel':'বাতিল','common.close':'বন্ধ করুন','common.search':'খুঁজুন','common.back':'ফিরে যান','lang.select':'ভাষা',
-    'category.vegetable':'সবজি','category.fruit':'ফল','category.field':'ক্ষেতের ফসল','category.all':'সব বিভাগ','crops.title':'ফসল',
-    'profile.title':'কৃষক প্রোফাইল','profile.name':'পূর্ণ নাম','profile.phone':'মোবাইল নম্বর','profile.state':'রাজ্য','profile.district':'জেলা','profile.idProofType':'কৃষক পরিচয়পত্র','profile.idProof.none':'নথি নির্বাচন করুন','profile.idProof.aadhaar':'আধার','profile.idProof.voter':'ভোটার আইডি','profile.idProof.pan':'প্যান','profile.idProof.farmer':'কৃষক নিবন্ধন / রাজ্য কৃষক ID','profile.idProof.kcc':'কিষান ক্রেডিট কার্ড (KCC)','profile.idProof.other':'অন্যান্য সরকারি পরিচয়পত্র','profile.status':'যাচাইয়ের অবস্থা','profile.notVerified':'যাচাই করা হয়নি','profile.verifyNote':'এই ডেমো প্রোফাইল শুধু এই ডিভাইসে সংরক্ষিত হয়। সরকারি পরিচয় যাচাইয়ের জন্য নিরাপদ ব্যাকএন্ড দরকার। এই স্ক্রিন আধার বা কোনও সরকারি ID যাচাই করে না।','profile.localOnly':'ডেমো প্রোফাইল — শুধু এই ব্রাউজারে সংরক্ষিত','profile.namePlaceholder':'পূর্ণ নাম লিখুন','profile.phonePlaceholder':'10 সংখ্যার মোবাইল নম্বর','profile.statePlaceholder':'যেমন, তেলেঙ্গানা','profile.districtPlaceholder':'জেলা লিখুন','profile.save':'প্রোফাইল সংরক্ষণ করুন','profile.close':'প্রোফাইল বন্ধ করুন','profile.saved':'এই ডিভাইসে প্রোফাইল সংরক্ষিত হয়েছে।','profile.avatarAlt':'কৃষকের প্রোফাইল ছবি','profile.photoHint':'ছবিটি public/images/profile/farmer-profile.jpg-এ রাখুন',
-    'ai.voiceInput':'আপনার প্রশ্ন বলুন','ai.stopListening':'শোনা বন্ধ করুন','ai.voiceOutput':'উত্তর শুনুন','ai.stopVoice':'ভয়েস বন্ধ করুন','ai.voiceUnsupported':'এই ব্রাউজারে ভয়েস ইনপুট নেই। আপনি প্রশ্ন টাইপ করতে পারেন।','ai.voiceOutputUnsupported':'এই ব্রাউজারে ভয়েস আউটপুট নেই।','ai.voiceError':'ভয়েস ইনপুট শুরু করা যায়নি। আবার চেষ্টা করুন বা টাইপ করুন।','ai.listening':'শুনছে… আপনার কৃষি-সংক্রান্ত প্রশ্ন বলুন।'
+/**
+ * Dev-time missing-key reporter: warns once per (lang,key). The parity test
+ * makes actual gaps impossible in CI, this is the runtime safety net.
+ */
+const warned = new Set();
+export function reportMissingKey(lang, key) {
+  const id = `${lang}:${key}`;
+  if (warned.has(id)) return;
+  warned.add(id);
+  if (typeof console !== 'undefined' && process.env?.NODE_ENV !== 'production') {
+    console.warn(`[i18n] missing key "${key}" for language "${lang}"`);
   }
-};
-
-Object.assign(translations.te, {
-  'nav.assistant':'AI వ్యవసాయ సహాయకుడు',
-  'profile.name':'పూర్తి పేరు','profile.phone':'మొబైల్ నంబర్','profile.state':'రాష్ట్రం','profile.district':'జిల్లా','profile.idProofType':'రైతు గుర్తింపు పత్రం','profile.idProof.none':'పత్రం ఎంచుకోండి','profile.idProof.aadhaar':'ఆధార్','profile.idProof.voter':'ఓటర్ ID','profile.idProof.pan':'పాన్','profile.idProof.farmer':'రైతు నమోదు / రాష్ట్ర రైతు ID','profile.idProof.kcc':'కిసాన్ క్రెడిట్ కార్డ్ (KCC)','profile.idProof.other':'ఇతర ప్రభుత్వ ID','profile.status':'ధృవీకరణ స్థితి','profile.notVerified':'ధృవీకరించబడలేదు','profile.verifyNote':'ఈ డెమో ప్రొఫైల్ ఈ పరికరంలో మాత్రమే సేవ్ అవుతుంది. అధికారిక గుర్తింపు ధృవీకరణకు సురక్షిత బ్యాకెండ్ అవసరం. ఈ స్క్రీన్ ఆధార్ లేదా ప్రభుత్వ IDని ధృవీకరించదు.','profile.localOnly':'డెమో ప్రొఫైల్ — ఈ బ్రౌజర్‌లో మాత్రమే సేవ్ చేయబడింది','profile.namePlaceholder':'పూర్తి పేరు నమోదు చేయండి','profile.phonePlaceholder':'10 అంకెల మొబైల్ నంబర్','profile.statePlaceholder':'ఉదా., తెలంగాణ','profile.districtPlaceholder':'జిల్లా నమోదు చేయండి','profile.save':'ప్రొఫైల్ సేవ్ చేయండి','profile.close':'ప్రొఫైల్ మూసివేయండి','profile.saved':'ఈ పరికరంలో ప్రొఫైల్ సేవ్ అయింది.','profile.avatarAlt':'రైతు ప్రొఫైల్ ఫోటో','profile.photoHint':'ఫోటోను public/images/profile/farmer-profile.jpg లో ఉంచండి',
-  'ai.voiceInput':'మీ ప్రశ్నను మాట్లాడండి','ai.stopListening':'వినడం ఆపండి','ai.voiceOutput':'సమాధానాన్ని చదవండి','ai.stopVoice':'వాయిస్ ఆపండి','ai.voiceUnsupported':'ఈ బ్రౌజర్‌లో వాయిస్ ఇన్‌పుట్ లేదు. మీ ప్రశ్నను టైప్ చేయవచ్చు.','ai.voiceOutputUnsupported':'ఈ బ్రౌజర్‌లో వాయిస్ అవుట్‌పుట్ లేదు.','ai.voiceError':'వాయిస్ ఇన్‌పుట్ ప్రారంభించలేకపోయాం. మళ్లీ ప్రయత్నించండి లేదా టైప్ చేయండి.','ai.listening':'వింటోంది… మీ వ్యవసాయ ప్రశ్నను మాట్లాడండి.'
-});
-
-// Complete locale dictionaries using English fallbacks. Existing Telugu copy is kept.
-translations.te = { ...translations.en, ...translations.te };
-for (const [code, overrides] of Object.entries(supplementalLocaleOverrides)) {
-  translations[code] = { ...translations.en, ...overrides };
 }

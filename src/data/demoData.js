@@ -26,10 +26,10 @@ export function dateDaysFromNow(days) {
 export function demoCurrentWeather() {
   return {
     isDemo: true,
-    location: 'Demo Farm, Guntur District',
+    location: 'demo.location',
     observedAt: new Date().toISOString(),
     temperatureC: 29,
-    condition: 'Partly cloudy',
+    condition: 'demo.condition.partly-cloudy',
     humidityPercent: 64,
     rainChancePercent: 20,
     windKph: 12,
@@ -37,11 +37,11 @@ export function demoCurrentWeather() {
 }
 
 const DEMO_FORECAST_PATTERN = [
-  { tempMaxC: 31, tempMinC: 23, condition: 'Sunny', rainMm: 0, rainChancePercent: 5 },
-  { tempMaxC: 30, tempMinC: 23, condition: 'Partly cloudy', rainMm: 1.2, rainChancePercent: 25 },
-  { tempMaxC: 28, tempMinC: 22, condition: 'Light showers', rainMm: 4.5, rainChancePercent: 60 },
-  { tempMaxC: 27, tempMinC: 22, condition: 'Thunderstorms', rainMm: 11.8, rainChancePercent: 75 },
-  { tempMaxC: 29, tempMinC: 23, condition: 'Cloudy', rainMm: 0.4, rainChancePercent: 30 },
+  { tempMaxC: 31, tempMinC: 23, condition: 'demo.condition.sunny', rainMm: 0, rainChancePercent: 5 },
+  { tempMaxC: 30, tempMinC: 23, condition: 'demo.condition.partly-cloudy', rainMm: 1.2, rainChancePercent: 25 },
+  { tempMaxC: 28, tempMinC: 22, condition: 'demo.condition.light-showers', rainMm: 4.5, rainChancePercent: 60 },
+  { tempMaxC: 27, tempMinC: 22, condition: 'demo.condition.thunderstorms', rainMm: 11.8, rainChancePercent: 75 },
+  { tempMaxC: 29, tempMinC: 23, condition: 'demo.condition.cloudy', rainMm: 0.4, rainChancePercent: 30 },
 ];
 
 export function demoForecast() {
@@ -61,14 +61,14 @@ export function demoWeatherAlerts() {
       {
         id: 'demo-heat-1',
         severity: 'warning',
-        title: 'Heat advisory (demo)',
-        body: 'Daytime temperatures may feel stressful for newly transplanted seedlings over the next two days. Consider light evening irrigation.',
+        title: 'demo.alert.heat.title',
+        body: 'demo.alert.heat.body',
       },
       {
         id: 'demo-rain-1',
         severity: 'info',
-        title: 'Rain expected mid-week (demo)',
-        body: 'The demo forecast shows showers on days 3–4. Delay fertilizer application if heavy rain is confirmed by your local provider.',
+        title: 'demo.alert.rain.title',
+        body: 'demo.alert.rain.body',
       },
     ],
   };
@@ -77,12 +77,10 @@ export function demoWeatherAlerts() {
 export function demoWeatherInsights() {
   return {
     isDemo: true,
-    summary:
-      'Demo interpretation: the sample forecast shows a warm week with a mid-week wet spell. Transplanted crops may benefit from the moisture, but waterlogging risk should be watched in heavy soils.',
-    supportingData: 'Based on the demo forecast only — no live provider is connected.',
-    uncertainty:
-      'Forecast skill decreases after day 3; treat later days as indicative only.',
-    nextSteps: 'Check the live forecast from your provider before irrigation scheduling.',
+    summary: 'demo.insight.seasonal',
+    supportingData: 'demo.insight.supporting',
+    uncertainty: 'demo.insight.uncertainty',
+    nextSteps: 'demo.insight.nextSteps',
   };
 }
 
@@ -92,17 +90,16 @@ export function demoCropSuitability(cropId) {
     isDemo: true,
     cropId,
     status: 'suitable', // illustrative only — labelled DEMO in the UI
-    explanation:
-      'Illustrative demo assessment: the sample forecast temperatures fall within a commonly suitable range for this crop. This is NOT a verified agronomic analysis.',
+    explanation: 'demo.suitability.note',
     scorePercent: 72,
   };
 }
 
 export function demoCropWeatherImpact(cropIds) {
   const notes = [
-    'Demo note: warm days support vegetative growth; watch moisture.',
-    'Demo note: mid-week showers may reduce irrigation need.',
-    'Demo note: humid spells increase foliar disease risk.',
+    'demo.impact.1',
+    'demo.impact.2',
+    'demo.impact.3',
   ];
   return {
     isDemo: true,
@@ -131,11 +128,11 @@ const DEMO_PRICES = {
 export function demoMarketPrices() {
   return {
     isDemo: true,
-    market: 'Demo Mandi, Guntur',
+    market: 'demo.market.name',
     reportedAt: dateDaysFromNow(0),
     unit: '₹/quintal',
-    grade: 'FAQ (demo)',
-    source: 'Demo dataset (not a live mandi feed)',
+    grade: 'demo.grade',
+    source: 'demo.market.source',
     entries: Object.entries(DEMO_PRICES).map(([cropId, v]) => {
       // Deterministic tiny "history" for the demo sparkline.
       const history = [v.prev * 0.97, v.prev * 0.99, v.prev, (v.prev + v.price) / 2, v.price].map(
@@ -172,7 +169,7 @@ export function demoDiaryEntries() {
       date: dateDaysFromNow(-1),
       activityType: 'sowing',
       cropId: 'onion',
-      description: 'Transplanted onion seedlings in the north plot (demo entry).',
+      description: 'demo.diary.1.desc',
       quantity: null,
       unit: null,
       expense: null,
@@ -184,7 +181,7 @@ export function demoDiaryEntries() {
       date: dateDaysFromNow(-3),
       activityType: 'irrigation',
       cropId: 'tomato',
-      description: 'Drip irrigation run for 2 hours in the tomato bed (demo entry).',
+      description: 'demo.diary.2.desc',
       quantity: 2,
       unit: 'hours',
       expense: null,
@@ -196,11 +193,11 @@ export function demoDiaryEntries() {
       date: dateDaysFromNow(-5),
       activityType: 'pest',
       cropId: 'okra',
-      description: 'Observed a few aphids on young okra plants — scouting again in 3 days (demo entry).',
+      description: 'demo.diary.3.desc',
       quantity: null,
       unit: null,
       expense: null,
-      notes: 'No spray applied yet.',
+      notes: 'demo.diary.3.notes',
       isDemo: true,
     },
     {
@@ -208,7 +205,7 @@ export function demoDiaryEntries() {
       date: dateDaysFromNow(-8),
       activityType: 'fertilizer',
       cropId: 'paddy',
-      description: 'Top-dressed nitrogen fertilizer in the main paddy field (demo entry).',
+      description: 'demo.diary.4.desc',
       quantity: 25,
       unit: 'kg',
       expense: 1200,
@@ -220,7 +217,7 @@ export function demoDiaryEntries() {
       date: dateDaysFromNow(-12),
       activityType: 'harvest',
       cropId: 'banana',
-      description: 'Harvested two banana bunches for the local market (demo entry).',
+      description: 'demo.diary.5.desc',
       quantity: 2,
       unit: 'bunches',
       expense: null,
@@ -232,11 +229,11 @@ export function demoDiaryEntries() {
       date: dateDaysFromNow(-15),
       activityType: 'expense',
       cropId: 'tomato',
-      description: 'Purchased seed and nursery trays (demo entry).',
+      description: 'demo.diary.6.desc',
       quantity: null,
       unit: null,
       expense: 850,
-      notes: 'Receipt kept in the file.',
+      notes: 'demo.diary.6.notes',
       isDemo: true,
     },
     {
@@ -244,11 +241,11 @@ export function demoDiaryEntries() {
       date: dateDaysFromNow(-18),
       activityType: 'note',
       cropId: null,
-      description: 'Soil test sample sent to the district lab (demo entry).',
+      description: 'demo.diary.7.desc',
       quantity: null,
       unit: null,
       expense: null,
-      notes: 'Expect results in two weeks.',
+      notes: 'demo.diary.7.notes',
       isDemo: true,
     },
   ];
@@ -263,26 +260,17 @@ export function demoDiaryEntries() {
 export function demoAIAnswer() {
   return {
     isDemo: true,
-    summary:
-      'This is a static demonstration answer because the FarmShield AI backend is not connected.',
+    summary: 'demo.ai.summary',
     observations: [
-      'Demo observation: post-harvest losses are often caused by moisture and poor ventilation rather than storage duration alone.',
+      'demo.ai.observation',
     ],
     actions: [
-      'Demo action: cure and dry harvested bulbs/tubers before long storage.',
-      'Demo action: inspect stored produce weekly and remove damaged pieces.',
+      'demo.ai.action1',
+      'demo.ai.action2',
     ],
-    avoid: ['Demo caution: do not seal fresh produce in airtight plastic.'],
+    avoid: ['demo.ai.caution'],
     sources: [],
-    uncertainty:
-      'No live model or agronomic database was consulted. Connect the backend AI endpoint for real answers.',
-    followups: [
-      'What ventilation is needed for my storage room?',
-      'How do I know if my produce has started to rot?',
-    ],
-    followupsTe: [
-      'నా నిల్వ గదికి ఎంత గాలి ప్రసరణ అవసరం?',
-      'నా ఉత్పత్తి కుళ్ళడం మొదలైందో ఎలా తెలుసుకోవాలి?',
-    ],
+    uncertainty: 'demo.ai.uncertainty',
+    followups: ['demo.ai.followup1', 'demo.ai.followup2'],
   };
 }

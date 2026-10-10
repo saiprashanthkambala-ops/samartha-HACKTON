@@ -19,9 +19,7 @@ export default function CropsPage() {
 
   const categories = [
     { id: 'all', label: t('category.all') },
-    { id: CROP_CATEGORIES.VEGETABLE, label: t('category.vegetable') },
-    { id: CROP_CATEGORIES.FRUIT, label: t('category.fruit') },
-    { id: CROP_CATEGORIES.FIELD, label: t('category.field') },
+    ...CROP_CATEGORIES.map((c) => ({ id: c.id, label: t(c.labelKey) })),
   ];
 
   return (
