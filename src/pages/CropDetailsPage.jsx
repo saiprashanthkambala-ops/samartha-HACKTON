@@ -25,21 +25,6 @@ import {
   getMarketPrices,
 } from '../api/services.js';
 
-const CROP_DETAIL_FALLBACKS = {
-  ginger: 'https://commons.wikimedia.org/wiki/Special:FilePath/Ginger_rhizomes.jpg?width=900',
-  'sweet-potato': 'https://commons.wikimedia.org/wiki/Special:FilePath/Sweet_potatoes.jpg?width=900',
-  'french-beans': 'https://commons.wikimedia.org/wiki/Special:FilePath/Green_bean.jpg?width=900',
-  'cluster-beans': 'https://commons.wikimedia.org/wiki/Special:FilePath/Cluster_beans.jpg?width=900',
-  turmeric: 'https://commons.wikimedia.org/wiki/Special:FilePath/Turmeric.jpg?width=900',
-  'green-peas': 'https://commons.wikimedia.org/wiki/Special:FilePath/Green_peas.jpg?width=900',
-  'amaranth-greens': 'https://commons.wikimedia.org/wiki/Special:FilePath/Amaranthus_tricolor.jpg?width=900',
-  drumstick: 'https://commons.wikimedia.org/wiki/Special:FilePath/Moringa_oleifera_pods.jpg?width=900',
-};
-
-function getCropFallbackSrc(crop) {
-  return CROP_DETAIL_FALLBACKS[crop.id];
-}
-
 const TABS = [
   'overview',
   'weather',
@@ -210,7 +195,6 @@ function MarketPanel({ crop, market }) {
         <div className="grid-2">
           <SmartImage
             src={crop.image}
-            fallbackSrc={getCropFallbackSrc(crop)}
             alt={cropName(crop)}
             style={{ width: '100%', height: 190, objectFit: 'cover', borderRadius: 14 }}
           />
@@ -393,7 +377,7 @@ export default function CropDetailsPage() {
 
       <div className="crop-top mt-8">
         <div className="card crop-identity">
-          <SmartImage src={crop.image} fallbackSrc={getCropFallbackSrc(crop)} alt={cropName(crop)} />
+          <SmartImage src={crop.image} alt={cropName(crop)} />
           <div>
             <div className="badges">
               <StatusBadge tone="blue">{t(`category.${crop.category}`)}</StatusBadge>
