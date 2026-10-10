@@ -71,7 +71,7 @@ export function LanguageProvider({ children }) {
   const formatCurrency = useCallback(
     (amount) => {
       if (amount == null || Number.isNaN(Number(amount))) return '—';
-      return new Intl.NumberFormat(lang === 'te' ? 'te-IN' : 'en-IN', {
+      return new Intl.NumberFormat(localeByLanguage[lang] || 'en-IN', {
         style: 'currency',
         currency: 'INR',
         maximumFractionDigits: 0,
@@ -83,7 +83,7 @@ export function LanguageProvider({ children }) {
   const formatNumber = useCallback(
     (n) => {
       if (n == null || Number.isNaN(Number(n))) return '—';
-      return new Intl.NumberFormat(lang === 'te' ? 'te-IN' : 'en-IN').format(Number(n));
+      return new Intl.NumberFormat(localeByLanguage[lang] || 'en-IN').format(Number(n));
     },
     [lang]
   );
