@@ -377,6 +377,27 @@ textarea {
   background: var(--green-pale);
   color: var(--green);
 }
+.brand-logo {
+  display: block;
+  height: 38px;
+  width: auto;
+  aspect-ratio: 3 / 2;
+  object-fit: contain;
+  flex-shrink: 0;
+  background: transparent;
+}
+.brand-name {
+  line-height: 1.2;
+}
+
+.app-logo {
+  display: inline-block;
+  vertical-align: middle;
+  object-fit: contain;
+  aspect-ratio: 3 / 2;
+  background: transparent;
+  border: none;
+}
 
 .main-nav {
   display: flex;
@@ -657,6 +678,26 @@ textarea {
   padding: 28px 30px;
   align-self: center;
   box-shadow: 0 12px 30px rgba(9, 47, 88, 0.25);
+}
+
+.hero-brand-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(18, 153, 95, 0.12);
+  color: var(--green-dark);
+  padding: 4px 12px 4px 6px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  margin-bottom: 14px;
+  letter-spacing: 0.01em;
+}
+
+.hero-badge-logo {
+  height: 18px;
+  width: auto;
+  object-fit: contain;
 }
 
 .hero-copy h1 {
@@ -1544,10 +1585,39 @@ textarea {
 .app-footer {
   border-top: 1px solid var(--border);
   background: var(--white);
-  padding: 16px 28px;
+  padding: 24px 28px;
   color: var(--muted);
   font-size: 0.82rem;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.footer-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 0.98rem;
+  color: var(--navy);
+}
+
+.footer-logo {
+  height: 24px;
+  width: auto;
+  object-fit: contain;
+}
+
+.footer-brand-name {
+  line-height: 1.2;
+}
+
+.footer-text {
+  margin: 0;
+  max-width: 620px;
+  line-height: 1.5;
 }
 
 /* ---------- Utilities ---------- */
@@ -1588,6 +1658,15 @@ textarea {
 .not-found {
   text-align: center;
   padding: 70px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.not-found-logo {
+  height: 56px;
+  width: auto;
+  margin-bottom: 12px;
 }
 
 /* ---------- Responsive ---------- */
@@ -1665,6 +1744,9 @@ textarea {
   }
   .app-header-wrap {
     padding: 10px 14px 0;
+  }
+  .brand-logo {
+    height: 32px;
   }
   .crop-grid {
     grid-template-columns: repeat(2, 1fr);

@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { Bot, Leaf, Menu, X } from 'lucide-react';
+import { Bot, Menu, X } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext.jsx';
+import Logo from '../common/Logo.jsx';
 import LanguageSelector from './LanguageSelector.jsx';
 import ProfileControl from './ProfileControl.jsx';
 
@@ -21,11 +22,9 @@ export default function AppHeader() {
   return (
     <div className="app-header-wrap">
       <header className={`app-header${open ? ' actions-visible' : ''}`}>
-        <a className="brand" href="/" onClick={() => setOpen(false)}>
-          <span className="brand-leaf">
-            <Leaf size={20} aria-hidden />
-          </span>
-          {t('app.name')}
+        <a className="brand" href="/" onClick={() => setOpen(false)} aria-label={t('app.name')}>
+          <Logo size="md" className="brand-logo" alt={`${t('app.name')} logo`} />
+          <span className="brand-name">{t('app.name')}</span>
         </a>
 
         <nav className={`main-nav${open ? ' open' : ''}`} aria-label={t('nav.menu')}>

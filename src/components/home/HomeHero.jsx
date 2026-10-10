@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight, Bot, Sprout } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext.jsx';
+import Logo from '../common/Logo.jsx';
 import SmartImage from '../shared/SmartImage.jsx';
 
 const HERO_BG = '/images/hero/farm-field.jpg';
@@ -16,6 +17,10 @@ export default function HomeHero() {
 
       <div className="hero-content">
         <div className="hero-copy">
+          <div className="hero-brand-badge">
+            <Logo size="xs" className="hero-badge-logo" alt="" />
+            <span>{t('app.name')}</span>
+          </div>
           <h1>
             {t('home.hero.line1')}
             <br />
