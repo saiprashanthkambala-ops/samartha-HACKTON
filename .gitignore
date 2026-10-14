@@ -23,3 +23,17 @@ new-*.jpg
 
 # patch files
 *.patch
+
+# python & backend
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+backend/.venv/
+backend/.env
+backend/static/uploads/
+scratch/
+uploads/

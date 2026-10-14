@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { Bot, Menu, X } from 'lucide-react';
+import { Bot, Layers, Menu, X } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext.jsx';
 import Logo from '../common/Logo.jsx';
 import LanguageSelector from './LanguageSelector.jsx';
@@ -13,6 +13,7 @@ export default function AppHeader() {
   const navItems = [
     { to: '/', label: t('nav.home'), end: true },
     { to: '/crops', label: t('nav.crops') },
+    { to: '/storage', label: t('nav.storage'), icon: Layers },
     { to: '/weather', label: t('nav.weather') },
     { to: '/market-prices', label: t('nav.market') },
     { to: '/farmer-diary', label: t('nav.diary') },
